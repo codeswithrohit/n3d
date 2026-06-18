@@ -280,7 +280,7 @@ function ProductDetailsContent() {
               {product.images?.map((img, i) => (
                 <img
                   key={i} src={img} onClick={() => setMainImage(img)}
-                  className={`w-16 h-16 md:w-20 md:h-20 cursor-pointer object-cover rounded-xl transition-all flex-shrink-0 ${
+                  className={`w-16 h-16 md:w-20 md:h-20 cursor-pointer object-fit rounded-xl transition-all flex-shrink-0 ${
                     mainImage === img 
                       ? 'border-2 border-black scale-105 shadow-md' 
                       : 'border border-neutral-200 opacity-70 hover:opacity-100 bg-neutral-50'
@@ -299,7 +299,7 @@ function ProductDetailsContent() {
               )}
               <img 
                 src={mainImage || '/placeholder.png'} 
-                className="w-full h-full object-contain p-4 mix-blend-multiply" 
+                className="w-full h-full object-fit p-4 mix-blend-multiply" 
                 alt={product.name} 
               />
             </div>
@@ -311,7 +311,7 @@ function ProductDetailsContent() {
               {product.name}
             </h1>
 
-            <p className="text-sm text-neutral-500 mb-3">by <span className="font-bold text-red-600">RSA</span></p>
+            <p className="text-sm text-neutral-500 mb-3">by <span className="font-bold text-red-600">N3D</span></p>
 
             <div className="flex items-center gap-2 mb-6 border-b border-neutral-100 pb-4">
               {renderStars(product.averageRating || 0)}

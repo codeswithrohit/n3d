@@ -122,7 +122,7 @@ export default function Carousel() {
                 <img
                   src={slide.img}
                   alt={slide.highlight}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-fit"
                 />
               </div>
             </div>

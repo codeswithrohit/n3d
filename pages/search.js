@@ -30,12 +30,12 @@ function SearchResultsContent() {
       setLoading(true);
       try {
         // 1. Fetch Categories for the sidebar
-        const catSnap = await db.collection("categories").get();
+        const catSnap = await db.collection("n3dcategories").get();
         const fetchedCats = catSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setCategories(fetchedCats);
 
         // 2. Fetch All Products (for client-side search & filtering)
-        const prodSnap = await db.collection("products").get();
+        const prodSnap = await db.collection("n3dproducts").get();
         const products = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setAllProducts(products);
 

@@ -7,11 +7,11 @@ const Pricerange = () => {
   const router = useRouter();
 
   const priceRanges = [
-    { id: 1, label: "UNDER", price: "249", img: "https://deodap.in/cdn/shop/files/Group_14981811.png?v=1773399085&width=300" },
-    { id: 2, label: "UNDER", price: "499", img: "https://deodap.in/cdn/shop/files/Group_14981814.png?v=1773398452&width=300" },
-    { id: 3, label: "UNDER", price: "999", img: "https://deodap.in/cdn/shop/files/Group_14981815.png?v=1773398488&width=300" },
-    { id: 4, label: "UNDER", price: "1499", img: "https://deodap.in/cdn/shop/files/Group_14981816_a018c298-2fca-4941-8e79-9c62e7068c98.png?v=1773398513&width=300" },
-    { id: 4, label: "ABOVE", price: "1999", img: "https://deodap.in/cdn/shop/files/Group_14981816_a018c298-2fca-4941-8e79-9c62e7068c98.png?v=1773398513&width=300" },
+    // { id: 1, label: "UNDER", price: "249", img: "/" },
+    { id: 1, label: "UNDER", price: "499", img: "/i1.png" },
+    // { id: 3, label: "UNDER", price: "999", img: "https://deodap.in/cdn/shop/files/Group_14981815.png?v=1773398488&width=300" },
+    { id: 2, label: "UNDER", price: "1999", img: "/i2.png" },
+    { id: 3, label: "ABOVE", price: "2499", img: "/i3.png" },
   ];
 
   return (
@@ -20,7 +20,7 @@ const Pricerange = () => {
         Explore Our Range
       </h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {priceRanges.map((item) => (
           <div 
             key={item.id}

@@ -40,7 +40,7 @@ function PriceRangeContent() {
       setLoading(true);
       try {
         // Fetch all products (or a limited batch if your DB is huge)
-        const prodSnap = await db.collection("products").get();
+        const prodSnap = await db.collection("n3dproducts").get();
         const allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         // Filter products client-side to accurately calculate nested variant prices
