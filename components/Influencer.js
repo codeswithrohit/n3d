@@ -101,7 +101,7 @@ const Influencer = () => {
     <div className="max-w-[1500px] mx-auto px-4 md:px-8 py-10 font-sans">
       
       {/* Section Title */}
-      <h2 className="text-2xl md:text-3xl font-black text-center mb-8 text-gray-900 dark:text-white tracking-wide">
+      <h2 className="text-2xl md:text-3xl text-white text-center mb-8 text-gray-900 dark:text-white tracking-wide">
         Top Pick By Influencers
       </h2>
 

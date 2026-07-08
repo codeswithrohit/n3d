@@ -100,7 +100,7 @@ export default function ProductSection({
   // MAIN COMPONENT RENDER
   // ==========================================
   return (
-    <div className="mx-auto mt-12 font-sans px-4 sm:px-6 lg:px-8 max-w-[1500px] bg-white text-black">
+    <div className="mx-auto mt-12 font-sans px-4 sm:px-6 lg:px-8 max-w-[1500px] bg-black text-black">
       
       {/* --- MODERN HEADER --- */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b pb-3 gap-4 border-gray-200">
@@ -148,7 +148,7 @@ export default function ProductSection({
               <div key={index} className="min-w-full h-full flex-shrink-0 relative">
                 <img 
                   src={src} 
-                  className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover" 
+                  className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-contain" 
                   alt={`Slide ${index}`} 
                 />
               </div>

@@ -14,11 +14,11 @@ export default function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="">
+    <div className="bg-black">
       {/* Header */}
       {/* <Header setSidebarOpen={setSidebarOpen} /> */}
 
-      <div className="w-full mx-auto mt-4 px-0">
+      <div className="w-full   px-0">
         <div className="flex md:gap-4">
         
 

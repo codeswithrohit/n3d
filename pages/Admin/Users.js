@@ -1,18 +1,29 @@
+"use client";
 import React, { useState, useEffect } from 'react';
 import { firebase } from '../../Firebase/config';
+import { 
+  FaUsers, 
+  FaUserCheck, 
+  FaUserClock, 
+  FaChevronLeft, 
+  FaChevronRight 
+} from 'react-icons/fa';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(10); // Adjust how many users to show per page
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // Fetching from the 'n3duser' collection created in your login flow
         const snapshot = await firebase
           .firestore()
           .collection('n3duser')
-          .orderBy('createdAt', 'desc') // Orders newest users first
+          .orderBy('createdAt', 'desc')
           .get();
 
         const usersList = snapshot.docs.map(doc => ({
@@ -31,9 +42,9 @@ const Users = () => {
     fetchUsers();
   }, []);
 
-  // Helper function to format Firebase Timestamp to a readable string
+  // Date Formatter
   const formatDate = (timestamp) => {
-    if (!timestamp) return 'N/A'; // Handles users that might not have a timestamp yet
+    if (!timestamp) return 'N/A';
     const date = timestamp.toDate();
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -44,6 +55,19 @@ const Users = () => {
     });
   };
 
+  // --- Dashboard Stats Calculations ---
+  const totalUsers = users.length;
+  const verifiedUsers = users.filter(user => user.verified).length;
+  const unverifiedUsers = totalUsers - verifiedUsers;
+
+  // --- Pagination Logic ---
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(totalUsers / usersPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -53,67 +77,137 @@ const Users = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto font-sans">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Registered Users</h2>
-        <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
-          Total: {users.length}
-        </span>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto font-sans bg-gray-50 min-h-screen">
+      
+      {/* Page Header */}
+      <div className="mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">User Management</h2>
+        <p className="text-sm text-gray-500 mt-1">Overview and management of all registered users.</p>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
+      {/* Dashboard Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        {/* Total Users Card */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Total Users</p>
+            <h3 className="text-3xl font-bold text-gray-900">{totalUsers}</h3>
+          </div>
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+            <FaUsers size={24} />
+          </div>
+        </div>
+
+        {/* Verified Users Card */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Verified</p>
+            <h3 className="text-3xl font-bold text-gray-900">{verifiedUsers}</h3>
+          </div>
+          <div className="p-3 bg-green-50 text-green-600 rounded-xl">
+            <FaUserCheck size={24} />
+          </div>
+        </div>
+
+        {/* Unverified Users Card */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Unverified</p>
+            <h3 className="text-3xl font-bold text-gray-900">{unverifiedUsers}</h3>
+          </div>
+          <div className="p-3 bg-amber-50 text-amber-500 rounded-xl">
+            <FaUserClock size={24} />
+          </div>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="bg-white shadow-sm rounded-2xl overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
-          <table className="min-w-full leading-normal">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr>
-               
-                <th className="px-5 py-4 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Mobile Number
-                </th>
-                <th className="px-5 py-4 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-5 py-4 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Created At
-                </th>
+              <tr className="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4">S.No</th>
+                <th className="px-6 py-4">Mobile Number</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Registered On</th>
               </tr>
             </thead>
-            <tbody>
-              {users.length > 0 ? (
-                users.map((user,index) => (
-                  <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                 
-                    <td className="px-5 py-4 border-b border-gray-200 text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap font-medium">
-                       {index+1}. {user.mobileNumber || 'N/A'}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4 border-b border-gray-200 text-sm">
-                      <span className={`relative inline-block px-3 py-1 font-semibold leading-tight ${user.verified ? 'text-green-900' : 'text-red-900'}`}>
-                        <span aria-hidden className={`absolute inset-0 opacity-50 rounded-full ${user.verified ? 'bg-green-200' : 'bg-red-200'}`}></span>
-                        <span className="relative text-xs">
+            <tbody className="divide-y divide-gray-100">
+              {currentUsers.length > 0 ? (
+                currentUsers.map((user, index) => {
+                  // Calculate correct serial number across pages
+                  const serialNumber = indexOfFirstUser + index + 1;
+                  
+                  return (
+                    <tr key={user.id} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                        {serialNumber}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        {user.mobileNumber || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          user.verified 
+                            ? 'bg-green-100 text-green-800 border border-green-200' 
+                            : 'bg-amber-100 text-amber-800 border border-amber-200'
+                        }`}>
                           {user.verified ? 'Verified' : 'Unverified'}
                         </span>
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 border-b border-gray-200 text-sm">
-                      <p className="text-gray-600 whitespace-no-wrap">
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(user.createdAt)}
-                      </p>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="4" className="px-5 py-8 text-center border-b border-gray-200 text-sm text-gray-500">
-                    No users found in the database.
+                  <td colSpan="4" className="px-6 py-12 text-center text-gray-500">
+                    <FaUsers className="mx-auto text-gray-300 text-4xl mb-3" />
+                    <p className="text-lg font-medium text-gray-600">No users found</p>
+                    <p className="text-sm">There are no registered users in the database yet.</p>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-sm text-gray-600 font-medium">
+              Showing <span className="font-semibold text-gray-900">{indexOfFirstUser + 1}</span> to <span className="font-semibold text-gray-900">{Math.min(indexOfLastUser, totalUsers)}</span> of <span className="font-semibold text-gray-900">{totalUsers}</span> users
+            </span>
+            
+            <div className="flex gap-2">
+              <button 
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <FaChevronLeft size={10} /> Prev
+              </button>
+              
+              {/* Optional: Page Numbers could go here */}
+              <div className="flex items-center px-2 text-sm font-medium text-gray-700">
+                Page {currentPage} of {totalPages}
+              </div>
+
+              <button 
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next <FaChevronRight size={10} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
     </div>
   );
 };

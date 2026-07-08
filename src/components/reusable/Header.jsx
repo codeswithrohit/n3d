@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import {
   FaUser,
@@ -27,6 +26,11 @@ export default function Header() {
 
   // ================= STATE: SEARCH ======================
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const searchRef = useRef(null);
 
   // ================= STATE: CATEGORIES =================
   const [categories, setCategories] = useState([]);
@@ -62,13 +66,11 @@ export default function Header() {
           id: doc.id,
           ...doc.data(),
         }));
-
         const subSnap = await db.collection("n3dsubcategories").get();
         const fetchedSubcategories = subSnap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
         setCategories(fetchedCategories);
         setSubcategories(fetchedSubcategories);
       } catch (error) {
@@ -77,8 +79,26 @@ export default function Header() {
         setLoadingCategories(false);
       }
     };
-
     fetchCategoriesData();
+  }, [db]);
+
+  // 2.1 Fetch Products for Search Suggestions
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const prodSnap = await db.collection("n3dproducts").get(); // Adjust collection name if different
+        const fetchedProducts = prodSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Error fetching products for suggestions:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+    fetchProducts();
   }, [db]);
 
   // 3. Listen for Firebase Auth state changes
@@ -95,13 +115,11 @@ export default function Header() {
       setCartItems([]);
       return;
     }
-
     setLoadingCart(true);
     const cartRefFirebase = db
       .collection("n3duser")
       .doc(user.uid)
       .collection("cart");
-
     const unsubscribe = cartRefFirebase
       .orderBy("addedAt", "desc")
       .onSnapshot(
@@ -118,7 +136,6 @@ export default function Header() {
           setLoadingCart(false);
         }
       );
-
     return () => unsubscribe();
   }, [user, db]);
 
@@ -130,6 +147,9 @@ export default function Header() {
       }
       if (userRef.current && !userRef.current.contains(e.target)) {
         setUserDropdownOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false);
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -152,6 +172,24 @@ export default function Header() {
     };
   }, [sidebarOpen]);
 
+  // 7. Filter suggestions based on search query
+  useEffect(() => {
+    if (searchQuery.trim().length === 0) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const filtered = products
+      .filter((product) =>
+        product.name?.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      )
+      .slice(0, 8); // Limit suggestions
+
+    setSuggestions(filtered);
+    setShowSuggestions(true);
+  }, [searchQuery, products]);
+
   const subTotal = cartItems.reduce(
     (acc, item) => acc + Number(item.price) * Number(item.quantity),
     0
@@ -170,13 +208,11 @@ export default function Header() {
   const updateQuantity = async (cartItemId, currentQty, change, maxStock) => {
     if (!user) return;
     const newQty = currentQty + change;
-
     if (newQty < 1) return;
     if (maxStock && newQty > maxStock) {
       alert("Cannot exceed available stock limit.");
       return;
     }
-
     try {
       await db
         .collection("n3duser")
@@ -218,34 +254,38 @@ export default function Header() {
     }
   };
 
-  // 7. Handle Search Submission
+  // 8. Handle Search Submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim() !== "") {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setMobileSearchOpen(false);
-      setSearchQuery(""); // Optional: clear after search
+      setSearchQuery("");
+      setShowSuggestions(false);
     }
+  };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (product) => {
+    setSearchQuery(product.name);
+    setShowSuggestions(false);
+    router.push(`/product/${product.id}`); // Adjust route as per your product page structure
   };
 
   return (
     <>
       <header className="w-full z-[100] sticky top-0 flex flex-col font-sans drop-shadow-md">
-        
+       
         {/* ================= ROW 1: TOP UTILITY BAR (Desktop) ================= */}
         <div className="hidden lg:flex w-full items-center justify-between px-8 py-2 bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 transition-colors">
-          <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-neutral-900 dark:text-white">
+          <div className="flex items-center gap-6 text-[10px] font-black tracking-widest text-neutral-900 dark:text-white">
             <div className="flex items-center gap-2">
               <span className="text-red-600"><FaPhoneAlt size={10} /></span>
-              <span>+91 9638666607</span>
+              <span>+91 9155242261</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-red-600"><FaEnvelope size={10} /></span>
-              <span>care@n3d.com</span>
-            </div>
-            <span className="text-neutral-300 dark:text-neutral-700">|</span>
-            <div className="flex items-center">
-              <span>9:00 AM TO 7:00 PM</span>
+              <span>nagina3dprinter@gmail.com</span>
             </div>
           </div>
         </div>
@@ -253,7 +293,7 @@ export default function Header() {
         {/* ================= ROW 2: MAIN HEADER ================= */}
         <div className="w-full bg-black transition-all duration-300">
           <div className="max-w-[1500px] mx-auto flex items-center justify-between h-16 px-4 md:px-8 gap-4 lg:gap-8">
-            
+           
             {/* LEFT: LOGO & MOBILE TOGGLE */}
             <div className="flex items-center gap-3 shrink-0">
               <button
@@ -262,7 +302,6 @@ export default function Header() {
               >
                 <FaBars />
               </button>
-
               <div
                 className="cursor-pointer flex items-center transition-transform active:scale-95 bg-white rounded-lg p-1"
                 onClick={() => router.push("/")}
@@ -275,28 +314,62 @@ export default function Header() {
               </div>
             </div>
 
-            {/* CENTER: SEARCH BAR (Desktop) */}
-            <form 
-              onSubmit={handleSearchSubmit} 
-              className="hidden md:flex flex-1 max-w-4xl mx-auto h-10 bg-white rounded-xl overflow-hidden border-2 border-transparent focus-within:border-red-600 transition-all"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="SEARCH FOR PRODUCTS..."
-                className="flex-1 h-full px-4 outline-none text-black text-[10px] font-black uppercase tracking-widest"
-              />
-              <button type="submit" className="bg-red-600 hover:bg-red-700 transition-colors w-14 h-full flex items-center justify-center text-white text-sm">
-                <FaSearch />
-              </button>
-            </form>
+            {/* CENTER: SEARCH BAR (Desktop) with Suggestions */}
+            <div className="hidden md:flex flex-1 max-w-4xl mx-auto relative" ref={searchRef}>
+              <form
+                onSubmit={handleSearchSubmit}
+                className="flex-1 h-10 bg-white rounded-xl overflow-hidden border-2 border-transparent focus-within:border-red-600 transition-all w-full"
+              >
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.trim().length > 0) setShowSuggestions(true);
+                  }}
+                  placeholder="SEARCH FOR PRODUCTS..."
+                  className="flex-1 h-full px-4 outline-none text-black text-[10px] font-black uppercase tracking-widest w-full"
+                />
+                <button type="submit" className="absolute right-0 top-0 bg-red-600 hover:bg-red-700 transition-colors w-14 h-full flex items-center justify-center text-white text-sm">
+                  <FaSearch />
+                </button>
+              </form>
+
+              {/* Desktop Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-neutral-950 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 z-[110] max-h-[320px] overflow-auto py-2">
+                  {suggestions.map((product) => (
+                    <div
+                      key={product.id}
+                      onClick={() => handleSuggestionClick(product)}
+                      className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-900 cursor-pointer flex items-center gap-3 border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                    >
+                      {product.image && (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-10 h-10 object-contain rounded-lg border border-neutral-200"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-neutral-900 dark:text-white truncate">
+                          {product.name}
+                        </p>
+                        {product.price && (
+                          <p className="text-xs text-red-600 font-black">₹{product.price}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* RIGHT: ICONS */}
             <div className="flex items-center gap-5 sm:gap-6 ml-auto shrink-0">
-              
+             
               {/* Mobile Search Toggle */}
-              <button 
+              <button
                 className="md:hidden text-white text-lg p-1 hover:text-red-500 transition-colors"
                 onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
               >
@@ -305,7 +378,7 @@ export default function Header() {
 
               {/* Login / User */}
               <div className="relative group cursor-pointer" ref={userRef}>
-                <div 
+                <div
                   className="flex items-center gap-2 text-white hover:text-red-500 transition-colors"
                   onClick={() => {
                     if (user) setUserDropdownOpen(!userDropdownOpen);
@@ -322,7 +395,6 @@ export default function Header() {
                   </span>
                   <FaChevronDown size={10} className="hidden lg:block mt-0.5" />
                 </div>
-
                 {/* User Dropdown */}
                 {user && (
                   <div className={`absolute right-0 top-[100%] mt-0 w-48 z-[110] ${userDropdownOpen ? 'block' : 'hidden group-hover:lg:block'}`}>
@@ -355,7 +427,6 @@ export default function Header() {
                     {cartItems.length}
                   </span>
                 </div>
-
                 {/* Cart Dropdown */}
                 {cartOpen && (
                   <div className="hidden lg:block absolute right-0 mt-6 w-[320px] bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white shadow-2xl border border-neutral-200 dark:border-neutral-800 rounded-2xl z-[110] overflow-hidden">
@@ -371,7 +442,6 @@ export default function Header() {
                   </div>
                 )}
               </div>
-
             </div>
           </div>
         </div>
@@ -380,15 +450,14 @@ export default function Header() {
         <div className="hidden lg:block w-full bg-neutral-900 border-t border-neutral-800">
           <div className="max-w-[1500px] mx-auto px-4 md:px-8 h-10 flex items-center">
             <ul className="flex items-center gap-6 xl:gap-8 text-[10px] font-black uppercase tracking-widest text-white w-full flex-wrap">
-              
+             
               {/* Dynamic Firebase Categories (Limit to 8) */}
               {!loadingCategories && categories.slice(0, 8).map((cat) => {
                 const catSubs = subcategories.filter(
                   (sub) => sub.categoryId === cat.id
                 );
-                
+               
                 const isHomeKitchen = cat.name.toLowerCase().includes("home & kitchen");
-
                 return (
                   <li
                     key={`desktop-${cat.id}`}
@@ -409,7 +478,6 @@ export default function Header() {
                         />
                       )}
                     </div>
-
                     {openDesktopDropdown === cat.id && catSubs.length > 0 && (
                       <div className="absolute top-[100%] left-0 z-[110] w-56 pt-2">
                         <div className="bg-white dark:bg-neutral-950 shadow-xl rounded-xl border border-neutral-200 dark:border-neutral-800 py-2 overflow-hidden">
@@ -443,16 +511,14 @@ export default function Header() {
                       className="transition-transform duration-200 group-hover/more:rotate-180"
                     />
                   </div>
-
                   {/* Dropdown 1: Remaining Categories */}
                   <div className="absolute top-[100%] right-0 z-[110] w-56 pt-2 hidden group-hover/more:block">
                     <div className="bg-white dark:bg-neutral-950 shadow-xl rounded-xl border border-neutral-200 dark:border-neutral-800 py-2">
-                      
+                     
                       {categories.slice(8).map((moreCat) => {
                         const moreCatSubs = subcategories.filter(
                           (sub) => sub.categoryId === moreCat.id
                         );
-
                         return (
                           <div key={`more-${moreCat.id}`} className="relative group/sub">
                             <div className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white transition-colors flex justify-between items-center">
@@ -461,7 +527,6 @@ export default function Header() {
                                 <FaChevronDown size={8} className="-rotate-90" />
                               )}
                             </div>
-
                             {/* Dropdown 2: Subcategories */}
                             {moreCatSubs.length > 0 && (
                               <div className="absolute top-0 right-full z-[111] w-56 pr-2 hidden group-hover/sub:block">
@@ -490,27 +555,29 @@ export default function Header() {
                           </div>
                         );
                       })}
-
                     </div>
                   </div>
                 </li>
               )}
-
             </ul>
           </div>
         </div>
 
-        {/* ================= MOBILE SEARCH BAR (Toggleable) ================= */}
-        <div 
+        {/* ================= MOBILE SEARCH BAR (Toggleable) with Suggestions ================= */}
+        <div
           className={`md:hidden overflow-hidden transition-all duration-300 bg-black ${
-            mobileSearchOpen ? 'max-h-20 opacity-100 py-2 px-4 border-t border-neutral-800' : 'max-h-0 opacity-0 py-0 px-4'
+            mobileSearchOpen ? 'max-h-[400px] opacity-100 py-3 px-4 border-t border-neutral-800' : 'max-h-0 opacity-0 py-0 px-4'
           }`}
         >
-           <form onSubmit={handleSearchSubmit} className="flex items-center bg-white rounded-xl overflow-hidden w-full h-11">
+          <div className="relative" ref={searchRef}>
+            <form onSubmit={handleSearchSubmit} className="flex items-center bg-white rounded-xl overflow-hidden w-full h-11">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim().length > 0) setShowSuggestions(true);
+                }}
                 placeholder="SEARCH PRODUCTS..."
                 className="flex-1 px-4 py-2 bg-transparent outline-none text-[10px] font-black uppercase tracking-widest text-black"
               />
@@ -518,6 +585,36 @@ export default function Header() {
                 <FaSearch />
               </button>
             </form>
+
+            {/* Mobile Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-neutral-950 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 z-[110] max-h-[280px] overflow-auto py-2">
+                {suggestions.map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => handleSuggestionClick(product)}
+                    className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-900 cursor-pointer flex items-center gap-3 border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                  >
+                    {product.image && (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-10 h-10 object-contain rounded-lg border border-neutral-200"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-neutral-900 dark:text-white truncate">
+                        {product.name}
+                      </p>
+                      {product.price && (
+                        <p className="text-xs text-red-600 font-black">₹{product.price}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -535,7 +632,6 @@ export default function Header() {
             <FaTimes />
           </button>
         </div>
-
         <div className="flex-1 overflow-y-auto hide-scrollbar pb-20">
           {loadingCategories ? (
             <div className="p-8 flex justify-center">
@@ -543,41 +639,38 @@ export default function Header() {
             </div>
           ) : (
             <ul className="text-[10px] font-black uppercase tracking-widest">
-              <li 
+              <li
                 className="border-b border-neutral-100 dark:border-neutral-800 px-5 py-4 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors"
                 onClick={() => { router.push('/'); setSidebarOpen(false); }}
               >
                 HOME
               </li>
-
               {categories.length > 0 ? (
                 categories.map((cat) => {
                   const catSubs = subcategories.filter(
                     (sub) => sub.categoryId === cat.id
                   );
                   const isExpanded = expandedMobileCat === cat.id;
-
                   return (
                     <li key={`mobile-${cat.id}`} className="border-b border-neutral-100 dark:border-neutral-800 flex flex-col">
-                      <div 
+                      <div
                         onClick={() => handleMobileCatClick(cat.id)}
                         className={`px-5 py-4 cursor-pointer transition-colors flex items-center justify-between ${
-                          isExpanded 
-                            ? "bg-neutral-50 dark:bg-neutral-900 text-black dark:text-white" 
+                          isExpanded
+                            ? "bg-neutral-50 dark:bg-neutral-900 text-black dark:text-white"
                             : "hover:bg-neutral-50 dark:hover:bg-neutral-900 text-neutral-600 dark:text-neutral-400"
                         }`}
                       >
                         <span>{cat.name}</span>
                         {catSubs.length > 0 && (
-                          <FaChevronDown 
+                          <FaChevronDown
                             size={10}
                             className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-black dark:text-white' : ''}`}
                           />
                         )}
                       </div>
-
                       {catSubs.length > 0 && (
-                        <div 
+                        <div
                           className={`overflow-hidden transition-all duration-300 ease-in-out bg-neutral-50/50 dark:bg-neutral-950 ${
                             isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
                           }`}
@@ -639,7 +732,6 @@ function CartContent({
       </div>
     );
   }
-
   if (cartItems.length === 0) {
     return (
       <div className="p-8 text-center flex flex-col items-center justify-center h-full">
@@ -654,7 +746,6 @@ function CartContent({
       </div>
     );
   }
-
   return (
     <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
       <div className="p-4 space-y-4 overflow-y-auto max-h-[55vh] flex-1 hide-scrollbar">
@@ -669,7 +760,6 @@ function CartContent({
                 className="w-14 h-14 object-contain rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-1"
                 alt={item.productName}
               />
-
               <div className="flex-1">
                 <p className="font-bold text-xs text-neutral-900 dark:text-white line-clamp-1">
                   {item.productName}
@@ -679,7 +769,6 @@ function CartContent({
                     {item.variant.optionValue}
                   </p>
                 )}
-
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center border-2 border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden h-6">
                     <button
@@ -704,12 +793,10 @@ function CartContent({
                       +
                     </button>
                   </div>
-
                   <span className="font-black text-sm text-neutral-900 dark:text-white">₹{item.price}</span>
                 </div>
               </div>
             </div>
-
             <button
               onClick={() => removeItem(item.id)}
               className="text-neutral-400 hover:text-red-600 dark:hover:text-red-500 transition-colors p-1"
@@ -719,7 +806,6 @@ function CartContent({
           </div>
         ))}
       </div>
-
       <div className="bg-neutral-50 dark:bg-neutral-900/50 border-t border-neutral-200 dark:border-neutral-800 mt-auto shrink-0">
         <div className="px-5 py-4 space-y-2">
           <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
@@ -733,7 +819,6 @@ function CartContent({
             <span className="text-red-600">₹{subTotal.toFixed(2)}</span>
           </div>
         </div>
-
         <div className="px-4 pb-4">
           <a
            href="/cart/Cart-page"

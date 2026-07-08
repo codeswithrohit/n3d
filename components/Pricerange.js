@@ -15,8 +15,8 @@ const Pricerange = () => {
   ];
 
   return (
-    <div className="max-w-[1500px] mx-auto px-4 md:px-8 py-12 sm:py-16 font-sans">
-      <h2 className="text-2xl md:text-3xl font-black text-center mb-10 md:mb-12 text-gray-900 tracking-wide">
+    <div className="max-w-[1500px] mx-auto px-4 md:px-8  font-sans">
+      <h2 className="text-2xl md:text-3xl text-white text-center  text-gray-900 tracking-wide">
         Explore Our Range
       </h2>
 

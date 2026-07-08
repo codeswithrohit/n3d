@@ -80,7 +80,7 @@ export default function HomeProducts() {
         className="group w-44 sm:w-48 md:w-56 flex-shrink-0 snap-start flex flex-col cursor-pointer border border-gray-200 hover:border-gray-300 rounded overflow-hidden bg-white transition-all"
       >
         {/* Image Container with Square Aspect Ratio & Light Gray BG */}
-        <div className="relative aspect-square bg-[#f8f8f8] p-4 flex items-center justify-center">
+        <div className="relative aspect-square bg-[#f8f8f8]  flex items-center justify-center">
           
           {/* Discount Badge */}
           {discount > 0 && (
@@ -92,7 +92,7 @@ export default function HomeProducts() {
           <img
             src={displayImage}
             alt={product.name}
-            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain "
           />
         </div>
         
@@ -153,13 +153,13 @@ export default function HomeProducts() {
   // MAIN RENDER
   // ==========================================
   return (
-    <div className="mx-auto p-4 sm:p-6 lg:p-8 mt-4 space-y-14 max-w-[1500px] bg-white text-black font-sans">
+    <div className="mx-auto p-4 sm:p-6 lg:p-8 mt-4 space-y-14 max-w-[1500px] bg-black text-black font-sans">
       
       {/* --- HOT DEALS SECTION --- */}
       {hotDeals.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-3">
-            <h2 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight flex items-center gap-2">
               <FaFireAlt className="text-red-500 mb-1" /> Trending Deals
             </h2>
           </div>

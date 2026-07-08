@@ -71,7 +71,7 @@ const Topcategories = () => {
               <img
                 src={cat.logo || (cat.sliders && cat.sliders[0]) || "/placeholder-category.png"} 
                 alt={cat.name}
-                className="w-full h-full object-fit group-hover:scale-105 transition-transform duration-500 ease-in-out"
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ease-in-out"
               />
 
               {cat.badge && (
@@ -82,7 +82,7 @@ const Topcategories = () => {
             </div>
 
             {/* Category Name */}
-            <h3 className="text-sm sm:text-[15px] font-bold text-[#e53e3e] text-center group-hover:text-red-700 transition-colors capitalize">
+            <h3 className="text-sm sm:text-[15px] font-bold text-white text-center group-hover:text-red-700 transition-colors capitalize">
               {cat.name}
             </h3>
           </div>

@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { firebase } from '../../Firebase/config';
 
@@ -9,6 +10,10 @@ const AdminOrders = () => {
   // Modal State
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(10); // Show 10 orders per page
 
   const STATUSES = [
     "Pending",
@@ -45,6 +50,7 @@ const AdminOrders = () => {
     }
   };
 
+  // Fetch Orders
   useEffect(() => {
     const unsubscribe = firebase.firestore().collection('n3dorders')
       .orderBy('createdAt', 'desc')
@@ -64,6 +70,7 @@ const AdminOrders = () => {
     return () => unsubscribe();
   }, []);
 
+  // Update Status
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       await firebase.firestore().collection('n3dorders').doc(orderId).update({
@@ -118,6 +125,14 @@ const AdminOrders = () => {
     return { totalRevenue, todayCount, statusCounts };
   }, [orders]);
 
+  // --- PAGINATION LOGIC ---
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   // Modal Handlers
   const openModal = (order) => {
     setSelectedOrder(order);
@@ -137,7 +152,7 @@ const AdminOrders = () => {
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-12 h-12">
             <div className="absolute inset-0 rounded-full border-[3px] border-slate-200"></div>
-            <div className="absolute inset-0 rounded-full border-[3px] border-slate-800 border-t-transparent animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-[3px] border-indigo-600 border-t-transparent animate-spin"></div>
           </div>
           <p className="text-sm font-semibold text-slate-500 tracking-wide uppercase">Loading Data...</p>
         </div>
@@ -229,11 +244,12 @@ const AdminOrders = () => {
         </div>
 
         {/* --- DATA TABLE --- */}
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="overflow-x-auto">
             <table className="min-w-full text-left whitespace-nowrap">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
+                  <th scope="col" className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">S.No</th>
                   <th scope="col" className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Order Info</th>
                   <th scope="col" className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Customer</th>
                   <th scope="col" className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
@@ -242,9 +258,9 @@ const AdminOrders = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {orders.length === 0 ? (
+                {currentOrders.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-20 text-center">
+                    <td colSpan="6" className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center">
                         <div className="bg-slate-50 p-4 rounded-full mb-4">
                           <svg className="w-10 h-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -257,85 +273,124 @@ const AdminOrders = () => {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-50/80 transition-colors duration-200">
-                      
-                      {/* 1. Order ID & Date */}
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1.5">
-                          <span className="text-sm font-bold text-slate-900 font-mono">
-                            #{order.id.slice(0, 8).toUpperCase()}
-                          </span>
-                          <span className="text-xs font-medium text-slate-500">
-                            {formatDate(order.createdAt || order.orderDate)}
-                          </span>
-                        </div>
-                      </td>
+                  currentOrders.map((order, index) => {
+                    // Correctly calculate serial number across pages
+                    const serialNumber = indexOfFirstOrder + index + 1;
 
-                      {/* 2. Customer Details */}
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1.5">
-                          <span className="text-sm font-semibold text-slate-900">
-                            {order.customerInfo?.company || 'Guest User'}
-                          </span>
-                          <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
-                            <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
-                            {order.userPhone || order.customerInfo?.mobileNumber || 'No Phone'}
-                          </span>
-                        </div>
-                      </td>
+                    return (
+                      <tr key={order.id} className="hover:bg-slate-50/80 transition-colors duration-200">
+                        
+                        {/* 1. Serial Number */}
+                        <td className="px-6 py-4 text-sm font-medium text-slate-500">
+                          {serialNumber}
+                        </td>
 
-                      {/* 3. Payment & Total */}
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1.5">
-                          <span className="text-sm font-bold text-slate-900">
-                            ₹{order.grandTotal || 0}
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full w-fit uppercase tracking-wider">
-                            {order.paymentMethod || 'COD'}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* 4. Order Status (Interactive) */}
-                      <td className="px-6 py-4">
-                        <div className="relative w-44">
-                          <select
-                            value={order.status || 'Pending'}
-                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                            className={`appearance-none block w-full px-3.5 py-2 text-xs font-bold rounded-xl border focus:ring-2 focus:ring-slate-900 outline-none cursor-pointer transition-colors shadow-sm ${getStatusStyle(order.status || 'Pending')}`}
-                          >
-                            {STATUSES.map((status) => (
-                              <option key={status} value={status} className="text-slate-900 font-medium bg-white">
-                                {status}
-                              </option>
-                            ))}
-                          </select>
-                          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-current opacity-50">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
+                        {/* 2. Order ID & Date */}
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-sm font-bold text-slate-900 font-mono">
+                              #{order.id.slice(0, 8).toUpperCase()}
+                            </span>
+                            <span className="text-xs font-medium text-slate-500">
+                              {formatDate(order.createdAt || order.orderDate)}
+                            </span>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* 5. Action Button */}
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                          onClick={() => openModal(order)}
-                          className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all shadow-sm"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        {/* 3. Customer Details */}
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-sm font-semibold text-slate-900">
+                              {order.customerInfo?.company || 'Guest User'}
+                            </span>
+                            <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                              <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              {order.userPhone || order.customerInfo?.mobileNumber || 'No Phone'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 4. Payment & Total */}
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-sm font-bold text-slate-900">
+                              ₹{order.grandTotal || 0}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full w-fit uppercase tracking-wider">
+                              {order.paymentMethod || 'COD'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 5. Order Status (Interactive) */}
+                        <td className="px-6 py-4">
+                          <div className="relative w-44">
+                            <select
+                              value={order.status || 'Pending'}
+                              onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                              className={`appearance-none block w-full px-3.5 py-2 text-xs font-bold rounded-xl border focus:ring-2 focus:ring-slate-900 outline-none cursor-pointer transition-colors shadow-sm ${getStatusStyle(order.status || 'Pending')}`}
+                            >
+                              {STATUSES.map((status) => (
+                                <option key={status} value={status} className="text-slate-900 font-medium bg-white">
+                                  {status}
+                                </option>
+                              ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-current opacity-50">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* 6. Action Button */}
+                        <td className="px-6 py-4 text-right">
+                          <button 
+                            onClick={() => openModal(order)}
+                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all shadow-sm"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* --- PAGINATION FOOTER --- */}
+          {totalPages > 1 && (
+            <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-sm text-slate-600 font-medium">
+                Showing <span className="font-bold text-slate-900">{indexOfFirstOrder + 1}</span> to <span className="font-bold text-slate-900">{Math.min(indexOfLastOrder, orders.length)}</span> of <span className="font-bold text-slate-900">{orders.length}</span> orders
+              </span>
+              
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                >
+                  Previous
+                </button>
+                <div className="flex items-center px-2 text-sm font-semibold text-slate-700">
+                  Page {currentPage} of {totalPages}
+                </div>
+                <button 
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -3,7 +3,29 @@
 import React, { useState, useEffect } from "react";
 import { firebase } from '../../Firebase/config';
 import { useRouter } from "next/navigation";
-import { FaMapMarkerAlt, FaEdit } from "react-icons/fa";
+import { FaMapMarkerAlt, FaEdit, FaCreditCard, FaMoneyBillWave } from "react-icons/fa";
+
+// Razorpay script loader
+const loadScript = async (src) => {
+  try {
+    await new Promise((resolve, reject) => {
+      const existingScript = document.querySelector(`script[src="${src}"]`);
+      if (existingScript) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.body.appendChild(script);
+    });
+    return true;
+  } catch (error) {
+    console.error("Error loading script:", error);
+    return false;
+  }
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -18,6 +40,7 @@ export default function CheckoutPage() {
   // Address & Order State
   const [deliveryAddress, setDeliveryAddress] = useState(null);
   const [comments, setComments] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState("COD"); // 'COD' or 'Online'
 
   // Resell State
   const [isResell, setIsResell] = useState(false);
@@ -34,7 +57,6 @@ export default function CheckoutPage() {
       setUser(currentUser);
 
       try {
-        // --- ADDRESS FETCHING LOGIC START ---
         let finalAddressData = null;
         const savedAddressId = localStorage.getItem('selectedCheckoutAddressId');
 
@@ -70,7 +92,6 @@ export default function CheckoutPage() {
           router.push('/cart');
           return;
         }
-        // --- ADDRESS FETCHING LOGIC END ---
 
         // Fetch Cart Items
         const cartSnap = await db.collection('n3duser').doc(currentUser.uid).collection('cart').get();
@@ -100,31 +121,11 @@ export default function CheckoutPage() {
   
   const totalTax = subTotal * 0.18; 
   const grandTotal = subTotal + totalTax;
-
-  // Resell Margin Calculation
   const margin = isResell && collectedAmount !== '' ? Number(collectedAmount) - grandTotal : 0;
 
-  // Submit Order
-  const handleConfirmOrder = async (e) => {
-    e.preventDefault();
-
-    if (!deliveryAddress) {
-      alert("Delivery address is missing.");
-      return;
-    }
-
-    // Resell Validation
-    if (isResell) {
-      if (!collectedAmount || Number(collectedAmount) < grandTotal) {
-        alert(`For a resell order, the collected amount must be at least ₹${grandTotal.toFixed(2)}.`);
-        return;
-      }
-    }
-
-    setIsSubmitting(true);
-
+  // Helper function to save order to Firestore
+  const finalizeOrder = async (finalPaymentMethod, paymentId = null) => {
     try {
-      // Create Order Document in 'n3dorders' collection
       const orderRef = await db.collection('n3dorders').add({
         userId: user.uid,
         userPhone: deliveryAddress.mobile, 
@@ -134,11 +135,11 @@ export default function CheckoutPage() {
         subTotal: subTotal,
         tax: totalTax,
         grandTotal: grandTotal,
-        paymentMethod: "Cash On Delivery",
-        status: "Pending", 
+        paymentMethod: finalPaymentMethod,
+        paymentId: paymentId,
+        status: finalPaymentMethod === "Online" ? "Paid" : "Pending", 
         orderDate: new Date().toISOString(), 
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        // Resell Data appended here
         isResell: isResell,
         collectedAmount: isResell ? Number(collectedAmount) : grandTotal,
         margin: isResell ? margin : 0
@@ -148,23 +149,86 @@ export default function CheckoutPage() {
       const cartRef = db.collection('n3duser').doc(user.uid).collection('cart');
       const cartDocs = await cartRef.get();
       const batch = db.batch();
-      cartDocs.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
+      cartDocs.forEach((doc) => batch.delete(doc.ref));
       await batch.commit();
 
-      // Clean up local storage
       localStorage.removeItem('selectedCheckoutAddressId');
-
       alert(`Order placed successfully!`);
-      // Route to Order Details page
       router.push(`/OrderDetails?orderId=${orderRef.id}`);
 
     } catch (error) {
-      console.error("Error placing order:", error);
-      alert("Failed to place order. Please try again.");
+      console.error("Error finalizing order:", error);
+      alert("Failed to place order. Please contact support.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Razorpay Initialization
+  const initiateOnlinePayment = async () => {
+    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+    if (!res) {
+      alert("Failed to load Razorpay SDK. Please check your internet connection.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const amountInPaise = Math.round(grandTotal * 100);
+
+    const options = {
+      key:"rzp_live_TAYD7YcBEcEsat", // Use env variable in production
+      currency: "INR",
+      amount: amountInPaise,
+      name: "N3D",
+      description: "Order Checkout",
+      image: "/logo.png",
+      handler: async function (response) {
+        // Payment successful
+        await finalizeOrder("Online", response.razorpay_payment_id);
+      },
+      prefill: {
+        name: deliveryAddress.name || "",
+        contact: deliveryAddress.mobile || "",
+      },
+      theme: {
+        color: "#000000" // Matches your black/white high-contrast theme
+      }
+    };
+
+    const paymentObject = new window.Razorpay(options);
+    
+    // Handle modal close without payment
+    paymentObject.on('payment.failed', function (response){
+        alert("Payment failed or cancelled. Please try again.");
+        setIsSubmitting(false);
+    });
+
+    paymentObject.open();
+  };
+
+  // Main Submit Handler
+  const handleConfirmOrder = async (e) => {
+    e.preventDefault();
+
+    if (!deliveryAddress) {
+      alert("Delivery address is missing.");
+      return;
+    }
+
+    if (isResell) {
+      if (!collectedAmount || Number(collectedAmount) < grandTotal) {
+        alert(`For a resell order, the collected amount must be at least ₹${grandTotal.toFixed(2)}.`);
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    if (paymentMethod === "COD") {
+      await finalizeOrder("Cash On Delivery", null);
+    } else {
+      await initiateOnlinePayment();
     }
   };
 
@@ -177,9 +241,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className=" mx-auto px-4 md:px-6 py-6 bg-white text-black font-sans min-h-screen relative transition-colors duration-300">
+    <div className="mx-auto px-4 md:px-6 py-6 bg-white text-black font-sans min-h-screen relative transition-colors duration-300">
       
-      {/* Loading Overlay for Submission */}
       {isSubmitting && (
         <div className="fixed inset-0 bg-neutral-900/70 z-50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-white mb-4"></div>
@@ -187,7 +250,6 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      {/* HEADER */}
       <div className="mb-6 border-b border-neutral-100 pb-4">
         <h1 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tight">
           Secure Checkout
@@ -220,9 +282,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <p className="font-bold text-black text-sm">
-                        {deliveryAddress.name} 
-                      </p>
+                      <p className="font-bold text-black text-sm">{deliveryAddress.name}</p>
                       <span className="text-[10px] font-bold text-neutral-500 bg-white border border-neutral-200 px-2 py-0.5 rounded uppercase tracking-wider">
                         {deliveryAddress.mobile}
                       </span>
@@ -231,9 +291,6 @@ export default function CheckoutPage() {
                       {deliveryAddress.houseNo}, {deliveryAddress.roadName} <br />
                       {deliveryAddress.city}, {deliveryAddress.state} - <span className="font-bold text-black">{deliveryAddress.pincode}</span>
                     </p>
-                    {deliveryAddress.landmark && (
-                      <p className="text-xs text-neutral-500 mt-1.5 font-medium">Landmark: {deliveryAddress.landmark}</p>
-                    )}
                   </div>
                 </div>
               )}
@@ -245,12 +302,42 @@ export default function CheckoutPage() {
             <div className="bg-white px-5 py-4 border-b border-neutral-200">
               <span className="font-black text-black text-sm uppercase tracking-wider">2. Payment Method</span>
             </div>
-            <div className="p-5">
-              <label className="flex items-center gap-3 p-4 border-2 rounded-xl border-black bg-neutral-100 cursor-pointer transition-colors shadow-sm">
-                <input type="radio" name="pay" defaultChecked className="w-4 h-4 accent-black" />
-                <span className="font-bold text-black text-sm uppercase tracking-wider">Cash On Delivery (COD)</span>
+            <div className="p-5 space-y-3">
+              
+              {/* Online Payment Option */}
+              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors shadow-sm ${paymentMethod === 'Online' ? 'border-black bg-neutral-100' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}>
+                <input 
+                  type="radio" 
+                  name="payment" 
+                  value="Online"
+                  checked={paymentMethod === 'Online'}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-4 h-4 accent-black" 
+                />
+                <FaCreditCard className="text-black" size={18} />
+                <div className="flex-1">
+                  <span className="font-bold text-black text-sm uppercase tracking-wider">Pay Online (Razorpay)</span>
+                  <p className="text-[10px] text-neutral-500 font-medium mt-0.5 uppercase tracking-wide">UPI, Credit/Debit Cards, NetBanking</p>
+                </div>
               </label>
-              <p className="text-xs text-neutral-500 mt-2.5 ml-1 font-medium">Pay securely with cash or UPI when your order is delivered.</p>
+
+              {/* COD Option */}
+              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors shadow-sm ${paymentMethod === 'COD' ? 'border-black bg-neutral-100' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}>
+                <input 
+                  type="radio" 
+                  name="payment" 
+                  value="COD"
+                  checked={paymentMethod === 'COD'}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-4 h-4 accent-black" 
+                />
+                <FaMoneyBillWave className="text-black" size={18} />
+                <div className="flex-1">
+                  <span className="font-bold text-black text-sm uppercase tracking-wider">Cash On Delivery</span>
+                  <p className="text-[10px] text-neutral-500 font-medium mt-0.5 uppercase tracking-wide">Pay via cash or UPI upon delivery</p>
+                </div>
+              </label>
+
             </div>
           </div>
 
@@ -258,7 +345,6 @@ export default function CheckoutPage() {
 
         {/* ================= RIGHT SIDE (Cart Summary & Submit) ================= */}
         <div className="lg:col-span-5 space-y-5">
-
           {/* CART TABLE & SUMMARY */}
           <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
             <div className="bg-white px-5 py-4 border-b border-neutral-200">
@@ -311,61 +397,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* RESELL THIS ORDER SECTION */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="bg-white px-5 py-4 border-b border-neutral-200">
-               <span className="font-black text-black text-sm uppercase tracking-wider">4. Resell This Order?</span>
-            </div>
-            <div className="p-5 space-y-4">
-              <div className="flex gap-3">
-                <button 
-                  type="button" 
-                  onClick={() => { setIsResell(false); setCollectedAmount(''); }}
-                  className={`flex-1 h-11 rounded-xl font-black uppercase tracking-widest text-xs transition-all border-2 ${!isResell ? 'bg-black text-white border-transparent shadow-sm scale-[1.02]' : 'bg-transparent text-neutral-500 border-neutral-200 hover:border-black hover:text-black'}`}
-                >
-                  No
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => setIsResell(true)}
-                  className={`flex-1 h-11 rounded-xl font-black uppercase tracking-widest text-xs transition-all border-2 ${isResell ? 'bg-black text-white border-transparent shadow-sm scale-[1.02]' : 'bg-transparent text-neutral-500 border-neutral-200 hover:border-black hover:text-black'}`}
-                >
-                  Yes
-                </button>
-              </div>
-
-              {isResell && (
-                <div className="p-4 mt-3 bg-white border border-neutral-200 rounded-xl space-y-3 shadow-sm">
-                  <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest leading-relaxed">
-                    Cash to be collected: <br/> 
-                    <span className="text-black font-bold capitalize tracking-normal text-xs">Order Total (₹{grandTotal.toFixed(2)}) + Your Margin</span>
-                  </p>
-                  
-                  <div>
-                    <input 
-                      type="number" 
-                      value={collectedAmount} 
-                      onChange={(e) => setCollectedAmount(e.target.value)} 
-                      placeholder="Enter amount (e.g., 1500)" 
-                      className="w-full h-11 bg-neutral-50 border border-neutral-200 text-black px-3 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-colors font-black text-sm" 
-                    />
-                  </div>
-                  
-                  {collectedAmount !== '' && (
-                    margin >= 0 ? (
-                      <p className="text-emerald-600 font-black text-xs uppercase tracking-wider">
-                        Your Margin: ₹{margin.toFixed(2)}
-                      </p>
-                    ) : (
-                      <p className="text-red-600 font-bold text-xs">
-                        Amount must be at least ₹{grandTotal.toFixed(2)}
-                      </p>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* COMMENTS & SUBMIT */}
           <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
@@ -386,7 +417,7 @@ export default function CheckoutPage() {
                 disabled={isSubmitting || !deliveryAddress || (isResell && margin < 0) || (isResell && collectedAmount === '')} 
                 className="w-full h-12 bg-red-600 text-white text-xs font-black tracking-widest uppercase rounded-xl hover:bg-red-700 transition-all shadow-md flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
               >
-                {isSubmitting ? "Processing..." : "Place Order (COD)"}
+                {isSubmitting ? "Processing..." : `Place Order (${paymentMethod === 'Online' ? 'Razorpay' : 'COD'})`}
               </button>
             </div>
           </div>

@@ -103,7 +103,7 @@ export default function Carousel() {
   }
 
   return (
-    <div className="w-full px-2 sm:px-4 lg:px-8 py-6 max-w-[1500px] mx-auto relative group">
+    <div className="w-full bg-black px-2 sm:px-4 lg:px-8 py-6 max-w-[1500px] mx-auto relative group">
       
       {/* Slider Container Track */}
       <div className="overflow-hidden w-full relative">

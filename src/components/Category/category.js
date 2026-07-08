@@ -65,7 +65,7 @@ export default function CategorySectionsWrapper() {
 
   return (
     // 🔥 FIX: Removed hardcoded bg-[#FFFFFF] and replaced with dark mode responsive backgrounds
-    <div className="bg-white dark:bg-neutral-950 space-y-10 pb-10 transition-colors duration-300 min-h-screen">
+    <div className="bg-black  space-y-10 pb-10 transition-colors duration-300 min-h-screen">
       {sectionsData.map((category) => {
         
         // Define featured product (e.g., the first product in the list or highest rated)
