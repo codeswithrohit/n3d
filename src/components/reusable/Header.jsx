@@ -303,13 +303,13 @@ export default function Header() {
                 <FaBars />
               </button>
               <div
-                className="cursor-pointer flex items-center transition-transform active:scale-95 bg-white rounded-lg p-1"
+                className="cursor-pointer flex items-center transition-transform active:scale-95  rounded-lg p-1"
                 onClick={() => router.push("/")}
               >
                 <img
-                  src="/logo.webp"
+                  src="/logo.jpeg"
                   alt="Logo"
-                  className="object-contain h-8 w-auto md:h-10"
+                  className="object-contain h-16 mt-4 w-auto md:h-20"
                 />
               </div>
             </div>

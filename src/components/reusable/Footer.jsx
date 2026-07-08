@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="w-full lg:w-[35%] flex flex-col gap-5">
           {/* Logo */}
           <div>
-            <img src="/logo.webp" className="object-contain bg-white rounded-md h-12 w-auto md:h-14" alt="N3D Logo" />
+            <img src="/logo.jpeg" className="object-contain  rounded-md h-16 w-auto md:h-20" alt="N3D Logo" />
             <p className="text-gray-300 text-sm mt-2 leading-relaxed">
               N3D - Elevate your space with stylish, modern, and timeless decor pieces that bring comfort, beauty and personality to every corner of your home.
             </p>

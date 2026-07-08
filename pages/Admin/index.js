@@ -30,8 +30,8 @@ const AdminDashboard = () => {
       // 1. Fetch total counts for stats (using .get() to count size)
       // Note: For massive databases, consider using Firebase count() queries or keeping a metadata document.
       const prodSnap = await db.collection('n3dproducts').get();
-      const usersSnap = await db.collection('users').get();
-      const allOrdersSnap = await db.collection('orders').get();
+      const usersSnap = await db.collection('n3duser').get();
+      const allOrdersSnap = await db.collection('n3dorders').get();
       const allContactsSnap = await db.collection('contact').get();
 
       setStats({

@@ -51,7 +51,7 @@ const Topcategories = () => {
 
   return (
     <div className="max-w-[1500px] mx-auto px-4 md:px-8 py-2 font-sans">
-      <h2 className="text-2xl md:text-3xl font-bold underline text-center mb-10 text-gray-900 dark:text-white tracking-wide">
+      <h2 className="text-2xl md:text-3xl font-bold underline text-center mb-10 text-white dark:text-white tracking-wide">
         Top Categories
       </h2>
 
