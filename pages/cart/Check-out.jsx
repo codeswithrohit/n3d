@@ -119,7 +119,7 @@ export default function CheckoutPage() {
     return acc + (Number(effectivePrice) * item.quantity);
   }, 0);
   
-  const totalTax = subTotal * 0.18; 
+  const totalTax = subTotal * 0; 
   const grandTotal = subTotal + totalTax;
   const margin = isResell && collectedAmount !== '' ? Number(collectedAmount) - grandTotal : 0;
 
@@ -177,7 +177,7 @@ export default function CheckoutPage() {
     const amountInPaise = Math.round(grandTotal * 100);
 
     const options = {
-      key:"rzp_live_TAYD7YcBEcEsat", // Use env variable in production
+      key: "rzp_live_TAYD7YcBEcEsat", // Use env variable in production
       currency: "INR",
       amount: amountInPaise,
       name: "N3D",
@@ -192,7 +192,7 @@ export default function CheckoutPage() {
         contact: deliveryAddress.mobile || "",
       },
       theme: {
-        color: "#000000" // Matches your black/white high-contrast theme
+        color: "#000000" // Set to black for dark mode theme matching
       }
     };
 
@@ -234,24 +234,24 @@ export default function CheckoutPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-white">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-black"></div>
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto px-4 md:px-6 py-6 bg-white text-black font-sans min-h-screen relative transition-colors duration-300">
+    <div className="mx-auto px-4 md:px-6 py-6 bg-black text-white font-sans min-h-screen relative transition-colors duration-300">
       
       {isSubmitting && (
-        <div className="fixed inset-0 bg-neutral-900/70 z-50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-white mb-4"></div>
            <h2 className="text-lg font-black uppercase tracking-widest">Processing Order...</h2>
         </div>
       )}
 
-      <div className="mb-6 border-b border-neutral-100 pb-4">
-        <h1 className="text-2xl md:text-3xl font-black text-black uppercase tracking-tight">
+      <div className="mb-6 border-b border-neutral-800 pb-4">
+        <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
           Secure Checkout
         </h1>
       </div>
@@ -262,13 +262,13 @@ export default function CheckoutPage() {
         <div className="lg:col-span-7 space-y-5">
 
           {/* DISPLAY DELIVERY ADDRESS */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="bg-white px-5 py-4 border-b border-neutral-200 flex justify-between items-center">
-              <span className="font-black text-black text-sm uppercase tracking-wider">1. Delivery Address</span>
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-neutral-950 px-5 py-4 border-b border-neutral-800 flex justify-between items-center">
+              <span className="font-black text-white text-sm uppercase tracking-wider">1. Delivery Address</span>
               <button 
                 type="button" 
                 onClick={() => router.push('/cart')} 
-                className="text-black text-[10px] font-bold uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all"
+                className="text-white text-[10px] font-bold uppercase tracking-widest hover:text-neutral-400 hover:underline flex items-center gap-1.5 transition-all"
               >
                 <FaEdit size={12} /> Change
               </button>
@@ -277,19 +277,19 @@ export default function CheckoutPage() {
             <div className="p-5">
               {deliveryAddress && (
                 <div className="flex items-start gap-3">
-                  <div className="bg-white border border-neutral-200 p-2.5 rounded-full text-black mt-0.5 flex-shrink-0 shadow-sm">
+                  <div className="bg-black border border-neutral-800 p-2.5 rounded-full text-white mt-0.5 flex-shrink-0">
                     <FaMapMarkerAlt size={14} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <p className="font-bold text-black text-sm">{deliveryAddress.name}</p>
-                      <span className="text-[10px] font-bold text-neutral-500 bg-white border border-neutral-200 px-2 py-0.5 rounded uppercase tracking-wider">
+                      <p className="font-bold text-white text-sm">{deliveryAddress.name}</p>
+                      <span className="text-[10px] font-bold text-neutral-400 bg-black border border-neutral-700 px-2 py-0.5 rounded uppercase tracking-wider">
                         {deliveryAddress.mobile}
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-600 leading-relaxed">
+                    <p className="text-xs text-neutral-400 leading-relaxed">
                       {deliveryAddress.houseNo}, {deliveryAddress.roadName} <br />
-                      {deliveryAddress.city}, {deliveryAddress.state} - <span className="font-bold text-black">{deliveryAddress.pincode}</span>
+                      {deliveryAddress.city}, {deliveryAddress.state} - <span className="font-bold text-white">{deliveryAddress.pincode}</span>
                     </p>
                   </div>
                 </div>
@@ -298,43 +298,43 @@ export default function CheckoutPage() {
           </div>
 
           {/* PAYMENT METHOD */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="bg-white px-5 py-4 border-b border-neutral-200">
-              <span className="font-black text-black text-sm uppercase tracking-wider">2. Payment Method</span>
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-neutral-950 px-5 py-4 border-b border-neutral-800">
+              <span className="font-black text-white text-sm uppercase tracking-wider">2. Payment Method</span>
             </div>
-            <div className="p-5 space-y-3">
+            <div className=" flex flex-row p-5 space-x-3">
               
               {/* Online Payment Option */}
-              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors shadow-sm ${paymentMethod === 'Online' ? 'border-black bg-neutral-100' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}>
+              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors shadow-sm ${paymentMethod === 'Online' ? 'border-white bg-neutral-800' : 'border-neutral-800 bg-black hover:border-neutral-600'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="Online"
                   checked={paymentMethod === 'Online'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-4 h-4 accent-black" 
+                  className="w-4 h-4 accent-white" 
                 />
-                <FaCreditCard className="text-black" size={18} />
+                <FaCreditCard className="text-white" size={18} />
                 <div className="flex-1">
-                  <span className="font-bold text-black text-sm uppercase tracking-wider">Pay Online (Razorpay)</span>
-                  <p className="text-[10px] text-neutral-500 font-medium mt-0.5 uppercase tracking-wide">UPI, Credit/Debit Cards, NetBanking</p>
+                  <span className="font-bold text-white text-xs uppercase tracking-wider">Pay Online (Razorpay)</span>
+                  <p className="text-[7px] text-neutral-400 font-bold mt-0.5 uppercase tracking-wide">UPI, Credit/Debit Cards, NetBanking</p>
                 </div>
               </label>
 
               {/* COD Option */}
-              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors shadow-sm ${paymentMethod === 'COD' ? 'border-black bg-neutral-100' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}>
+              <label className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors shadow-sm ${paymentMethod === 'COD' ? 'border-white bg-neutral-800' : 'border-neutral-800 bg-black hover:border-neutral-600'}`}>
                 <input 
                   type="radio" 
                   name="payment" 
                   value="COD"
                   checked={paymentMethod === 'COD'}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-4 h-4 accent-black" 
+                  className="w-4 h-4 accent-white" 
                 />
-                <FaMoneyBillWave className="text-black" size={18} />
+                <FaMoneyBillWave className="text-white" size={18} />
                 <div className="flex-1">
-                  <span className="font-bold text-black text-sm uppercase tracking-wider">Cash On Delivery</span>
-                  <p className="text-[10px] text-neutral-500 font-medium mt-0.5 uppercase tracking-wide">Pay via cash or UPI upon delivery</p>
+                  <span className="font-bold text-white text-xs uppercase tracking-wider">Cash On Delivery</span>
+                  <p className="text-[7px] text-neutral-400 font-bold mt-0.5 uppercase tracking-wide">Pay via cash or UPI upon delivery</p>
                 </div>
               </label>
 
@@ -346,27 +346,28 @@ export default function CheckoutPage() {
         {/* ================= RIGHT SIDE (Cart Summary & Submit) ================= */}
         <div className="lg:col-span-5 space-y-5">
           {/* CART TABLE & SUMMARY */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-            <div className="bg-white px-5 py-4 border-b border-neutral-200">
-              <span className="font-black text-black text-sm uppercase tracking-wider">3. Order Summary</span>
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+            <div className="bg-neutral-950 px-5 py-4 border-b border-neutral-800">
+              <span className="font-black text-white text-sm uppercase tracking-wider">3. Order Summary</span>
             </div>
 
             <div className="overflow-y-auto max-h-60 p-5 space-y-3 hide-scrollbar">
               {cartItems.map((item) => {
                 const effectivePrice = item.userResellPrice || item.price;
                 return (
-                  <div key={item.id} className="flex items-center justify-between border-b border-neutral-200 pb-3 last:border-0 last:pb-0">
+                  <div key={item.id} className="flex items-center justify-between border-b border-neutral-800 pb-3 last:border-0 last:pb-0">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 flex-shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-white">
-                         <img src={item.image || "/placeholder.png"} className="w-full h-full object-contain p-1 mix-blend-multiply" alt={item.productName} />
+                      {/* Using bg-white on images ensures transparent PNGs stay visible */}
+                      <div className="w-12 h-12 flex-shrink-0 overflow-hidden rounded-xl border border-neutral-800 bg-white">
+                         <img src={item.image || "/placeholder.png"} className="w-full h-full object-contain p-1" alt={item.productName} />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-black line-clamp-1">{item.productName}</p>
-                        <p className="text-[10px] font-bold text-neutral-500 mt-0.5 uppercase tracking-wider">Qty: {item.quantity} {item.variant?.optionValue ? `| ${item.variant.optionValue}` : ''}</p>
+                        <p className="text-xs font-bold text-white line-clamp-1">{item.productName}</p>
+                        <p className="text-[10px] font-bold text-neutral-400 mt-0.5 uppercase tracking-wider">Qty: {item.quantity} {item.variant?.optionValue ? `| ${item.variant.optionValue}` : ''}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black text-black">₹{(effectivePrice * item.quantity).toFixed(2)}</p>
+                      <p className="text-sm font-black text-white">₹{(effectivePrice * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 );
@@ -374,40 +375,39 @@ export default function CheckoutPage() {
             </div>
 
             {/* TOTALS */}
-            <div className="bg-white p-5 border-t border-neutral-200 space-y-2.5">
-              <div className="flex justify-between text-xs text-neutral-600 font-medium">
+            <div className="bg-neutral-950 p-5 border-t border-neutral-800 space-y-2.5">
+              <div className="flex justify-between text-xs text-neutral-400 font-medium">
                 <span>Sub-Total</span>
-                <span className="font-bold text-black">₹{subTotal.toFixed(2)}</span>
+                <span className="font-bold text-white">₹{subTotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-xs text-neutral-600 font-medium">
-                <span>Tax (18%)</span>
-                <span className="font-bold text-black">₹{totalTax.toFixed(2)}</span>
+              <div className="flex justify-between text-xs text-neutral-400 font-medium">
+                <span>Tax (0%)</span>
+                <span className="font-bold text-white">₹{totalTax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-xs text-neutral-600 font-medium">
+              <div className="flex justify-between text-xs text-neutral-400 font-medium">
                 <span>Shipping</span>
-                <span className="font-black text-emerald-600 uppercase tracking-widest">Free</span>
+                <span className="font-black text-white uppercase tracking-widest">Free</span>
               </div>
-              <div className="flex justify-between items-end pt-3 border-t border-neutral-200 mt-3">
-                <span className="text-sm font-black text-black uppercase tracking-wider">Order Total</span>
+              <div className="flex justify-between items-end pt-3 border-t border-neutral-800 mt-3">
+                <span className="text-sm font-black text-white uppercase tracking-wider">Order Total</span>
                 <div className="text-right">
-                   <span className="text-2xl font-black text-red-600 leading-none">₹{grandTotal.toFixed(2)}</span>
+                   <span className="text-2xl font-black text-white leading-none">₹{grandTotal.toFixed(2)}</span>
                    <p className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mt-1">Includes all taxes</p>
                 </div>
               </div>
             </div>
           </div>
 
-
           {/* COMMENTS & SUBMIT */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-2">Order Comments (Optional)</label>
+                <label className="block text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-2">Order Comments (Optional)</label>
                 <textarea 
                   name="comments" 
                   value={comments} 
                   onChange={(e) => setComments(e.target.value)} 
-                  className="w-full bg-white border border-neutral-200 text-black p-3 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none h-20 resize-none transition-colors text-xs" 
+                  className="w-full bg-black border border-neutral-800 text-white placeholder-neutral-600 p-3 rounded-xl focus:ring-2 focus:ring-white focus:border-transparent outline-none h-20 resize-none transition-colors text-xs" 
                   placeholder="Any special instructions for delivery..."
                 ></textarea>
               </div>
@@ -415,7 +415,7 @@ export default function CheckoutPage() {
               <button 
                 type="submit" 
                 disabled={isSubmitting || !deliveryAddress || (isResell && margin < 0) || (isResell && collectedAmount === '')} 
-                className="w-full h-12 bg-red-600 text-white text-xs font-black tracking-widest uppercase rounded-xl hover:bg-red-700 transition-all shadow-md flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
+                className="w-full h-12 bg-white text-black text-xs font-black tracking-widest uppercase rounded-xl hover:bg-neutral-300 transition-all shadow-md flex items-center justify-center disabled:opacity-50 disabled:shadow-none"
               >
                 {isSubmitting ? "Processing..." : `Place Order (${paymentMethod === 'Online' ? 'Razorpay' : 'COD'})`}
               </button>

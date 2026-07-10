@@ -228,22 +228,85 @@ export default function CartPage() {
   const totalTax = subTotal * 0.18; 
   const grandTotal = subTotal + totalTax;
 
+  // SKELETON LOADING STATE (Dark Mode)
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[400px] bg-white text-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-black"></div>
+      <div className="bg-black min-h-screen py-8 px-4 sm:px-6 lg:px-8 font-sans">
+        <div className="max-w-[1250px] mx-auto animate-pulse">
+          {/* Header Skeleton */}
+          <div className="mb-8 border-b border-neutral-800 pb-6">
+            <div className="h-10 bg-neutral-800 w-64 rounded mb-4"></div>
+            <div className="h-4 bg-neutral-800 w-96 rounded"></div>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+            {/* Left Column Skeleton */}
+            <div className="lg:w-2/3 flex flex-col gap-6">
+              <div className="bg-neutral-900 rounded-3xl border border-neutral-800 overflow-hidden p-6">
+                <div className="h-6 bg-neutral-800 w-full rounded mb-8"></div>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col sm:flex-row items-center gap-4 mb-6 border-b border-neutral-800 pb-6 last:border-0 last:pb-0">
+                    <div className="h-20 w-20 bg-neutral-800 rounded-2xl flex-shrink-0"></div>
+                    <div className="flex-1 w-full space-y-3">
+                      <div className="h-5 bg-neutral-800 w-3/4 rounded"></div>
+                      <div className="h-4 bg-neutral-800 w-1/4 rounded"></div>
+                    </div>
+                    <div className="w-28 h-10 bg-neutral-800 rounded-xl"></div>
+                    <div className="w-20 h-6 bg-neutral-800 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="lg:w-1/3 flex flex-col gap-6">
+              <div className="bg-neutral-900 rounded-3xl border border-neutral-800 overflow-hidden p-6">
+                <div className="h-6 bg-neutral-800 w-1/2 rounded mb-6"></div>
+                <div className="flex gap-4">
+                  <div className="h-10 w-10 bg-neutral-800 rounded-full flex-shrink-0"></div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-neutral-800 w-3/4 rounded"></div>
+                    <div className="h-4 bg-neutral-800 w-full rounded"></div>
+                    <div className="h-4 bg-neutral-800 w-1/2 rounded"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-900 rounded-3xl border border-neutral-800 overflow-hidden p-6">
+                <div className="h-6 bg-neutral-800 w-1/2 rounded mb-6"></div>
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between">
+                    <div className="h-4 bg-neutral-800 w-1/3 rounded"></div>
+                    <div className="h-4 bg-neutral-800 w-1/4 rounded"></div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-4 bg-neutral-800 w-1/3 rounded"></div>
+                    <div className="h-4 bg-neutral-800 w-1/4 rounded"></div>
+                  </div>
+                </div>
+                <div className="pt-6 border-t border-neutral-800 flex justify-between items-end mb-6">
+                  <div className="h-6 bg-neutral-800 w-1/4 rounded"></div>
+                  <div className="h-8 bg-neutral-800 w-1/3 rounded"></div>
+                </div>
+                <div className="h-14 bg-neutral-800 w-full rounded-xl mb-3"></div>
+                <div className="h-14 bg-neutral-800 w-full rounded-xl"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  // NOT LOGGED IN STATE
   if (!user) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-[60vh] max-w-6xl mx-auto p-10 text-center bg-white text-black font-sans">
-        <div className="bg-neutral-50 p-10 rounded-3xl border border-neutral-200 max-w-md w-full shadow-sm">
-          <FaShoppingCart className="mx-auto text-5xl text-neutral-300 mb-6" />
-          <h2 className="text-2xl font-black mb-3 text-black uppercase tracking-wide">Sign in to view cart</h2>
-          <p className="text-neutral-500 mb-8 text-sm">Please log in to access your saved items and continue shopping.</p>
-          <button onClick={() => router.push('/login')} className="w-full bg-black text-white font-black tracking-widest uppercase py-4 rounded-xl hover:bg-neutral-800 transition-colors text-sm shadow-lg">
+      <div className="flex flex-col justify-center items-center min-h-[60vh] max-w-6xl mx-auto p-10 text-center bg-black text-white font-sans">
+        <div className="bg-neutral-900 p-10 rounded-3xl border border-neutral-800 max-w-md w-full shadow-2xl">
+          <FaShoppingCart className="mx-auto text-5xl text-neutral-600 mb-6" />
+          <h2 className="text-2xl font-black mb-3 text-white uppercase tracking-wide">Sign in to view cart</h2>
+          <p className="text-neutral-400 mb-8 text-sm">Please log in to access your saved items and continue shopping.</p>
+          <button onClick={() => router.push('/login')} className="w-full bg-white text-black font-black tracking-widest uppercase py-4 rounded-xl hover:bg-neutral-200 transition-colors text-sm">
             Go to Login
           </button>
         </div>
@@ -252,27 +315,27 @@ export default function CartPage() {
   }
 
   return (
-    <div className="bg-white text-black min-h-screen py-8 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden font-sans">
+    <div className="bg-black text-white min-h-screen py-8 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden font-sans">
       <div className="max-w-[1250px] mx-auto">
         
         {/* HEADER */}
-        <div className="mb-8 border-b border-neutral-100 pb-6">
-          <h1 className="text-3xl md:text-4xl font-black text-black uppercase tracking-tight">
+        <div className="mb-8 border-b border-neutral-800 pb-6">
+          <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
             Shopping Cart
           </h1>
-          <p className="mt-2 text-sm text-neutral-500 font-medium tracking-wide">
+          <p className="mt-2 text-sm text-neutral-400 font-medium tracking-wide">
             Review your items and complete your purchase.
           </p>
         </div>
 
         {cartItems.length === 0 ? (
-          <div className="bg-neutral-50 rounded-3xl border border-neutral-200 p-16 text-center flex flex-col items-center justify-center shadow-sm">
-            <div className="bg-white p-6 rounded-full mb-6 border border-neutral-200 shadow-sm">
-              <FaShoppingCart className="text-5xl text-neutral-300" />
+          <div className="bg-neutral-900 rounded-3xl border border-neutral-800 p-16 text-center flex flex-col items-center justify-center">
+            <div className="bg-black p-6 rounded-full mb-6 border border-neutral-800">
+              <FaShoppingCart className="text-5xl text-neutral-600" />
             </div>
-            <h3 className="text-xl font-black text-black mb-2 uppercase tracking-wide">Your cart is empty</h3>
-            <p className="text-neutral-500 mb-8 max-w-md text-sm">Looks like you haven't added anything to your cart yet. Let's find something special.</p>
-            <button onClick={() => router.push('/')} className="bg-black text-white font-black tracking-widest uppercase px-8 py-4 rounded-xl hover:bg-neutral-800 transition-colors shadow-lg text-sm">
+            <h3 className="text-xl font-black text-white mb-2 uppercase tracking-wide">Your cart is empty</h3>
+            <p className="text-neutral-400 mb-8 max-w-md text-sm">Looks like you haven't added anything to your cart yet. Let's find something special.</p>
+            <button onClick={() => router.push('/')} className="bg-white text-black font-black tracking-widest uppercase px-8 py-4 rounded-xl hover:bg-neutral-200 transition-colors text-sm">
               Start Shopping
             </button>
           </div>
@@ -281,10 +344,10 @@ export default function CartPage() {
             
             {/* LEFT COLUMN: CART ITEMS */}
             <div className="lg:w-2/3 flex flex-col gap-6">
-              <div className="bg-neutral-50 rounded-3xl border border-neutral-200 overflow-hidden shadow-sm">
+              <div className="bg-neutral-900 rounded-3xl border border-neutral-800 overflow-hidden">
                 <div className="overflow-x-auto hide-scrollbar">
                   <table className="w-full text-left border-collapse">
-                    <thead className="bg-white text-neutral-500 text-xs font-bold uppercase tracking-widest border-b border-neutral-200">
+                    <thead className="bg-neutral-900 text-neutral-400 text-xs font-bold uppercase tracking-widest border-b border-neutral-800">
                       <tr>
                         <th className="p-5">Product Detail</th>
                         <th className="p-5 text-center">Quantity</th>
@@ -293,19 +356,20 @@ export default function CartPage() {
                         <th className="p-5 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-neutral-200">
+                    <tbody className="divide-y divide-neutral-800">
                       {cartItems.map((item) => (
-                        <tr key={item.id} className="hover:bg-neutral-100 transition-colors">
+                        <tr key={item.id} className="hover:bg-neutral-800/50 transition-colors">
                           {/* PRODUCT INFO */}
                           <td className="p-5">
                             <div className="flex items-center gap-4">
-                              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
-                                <img src={item.image || "/placeholder.png"} className="h-full w-full object-contain p-2 mix-blend-multiply" alt={item.productName} />
+                              {/* White background for images so products without transparent backgrounds still look correct */}
+                              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border border-neutral-800 bg-white">
+                                <img src={item.image || "/placeholder.png"} className="h-full w-full object-contain p-2" alt={item.productName} />
                               </div>
                               <div className="flex flex-col">
-                                <span className="font-bold text-black text-base line-clamp-2">{item.productName}</span>
+                                <span className="font-bold text-white text-base line-clamp-2">{item.productName}</span>
                                 {item.variant?.optionValue && (
-                                  <span className="text-xs font-bold text-neutral-500 mt-1 uppercase tracking-wider">Variant: {item.variant.optionValue}</span>
+                                  <span className="text-xs font-bold text-neutral-400 mt-1 uppercase tracking-wider">Variant: {item.variant.optionValue}</span>
                                 )}
                               </div>
                             </div>
@@ -314,31 +378,31 @@ export default function CartPage() {
                           {/* QUANTITY */}
                           <td className="p-5">
                             <div className="flex items-center justify-center">
-                              <div className="flex items-center border-2 border-neutral-200 rounded-xl bg-transparent h-10 w-28 overflow-hidden">
+                              <div className="flex items-center border-2 border-neutral-700 rounded-xl bg-black h-10 w-28 overflow-hidden">
                                 <button 
                                   onClick={() => updateQuantity(item.id, item.quantity, -1, item.variant?.stock)}
                                   disabled={item.quantity <= 1}
-                                  className="w-8 h-full flex items-center justify-center text-neutral-600 hover:bg-neutral-100 transition-colors disabled:opacity-30 font-medium"
+                                  className="w-8 h-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors disabled:opacity-30 font-medium"
                                 >−</button>
-                                <span className="flex-1 text-center font-bold text-sm text-black border-x-2 border-neutral-200">
+                                <span className="flex-1 text-center font-bold text-sm text-white border-x-2 border-neutral-700">
                                   {item.quantity}
                                 </span>
                                 <button 
                                   onClick={() => updateQuantity(item.id, item.quantity, 1, item.variant?.stock)}
                                   disabled={item.variant?.stock && item.quantity >= item.variant.stock}
-                                  className="w-8 h-full flex items-center justify-center text-neutral-600 hover:bg-neutral-100 transition-colors disabled:opacity-30 font-medium"
+                                  className="w-8 h-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors disabled:opacity-30 font-medium"
                                 >+</button>
                               </div>
                             </div>
                           </td>
 
                           {/* BASE PRICE */}
-                          <td className="p-5 text-right font-bold text-neutral-600">
+                          <td className="p-5 text-right font-bold text-neutral-400">
                             ₹{item.price}
                           </td>
 
                           {/* TOTAL */}
-                          <td className="p-5 text-right font-black text-black text-lg">
+                          <td className="p-5 text-right font-black text-white text-lg">
                             ₹{(item.price * item.quantity).toFixed(2)}
                           </td>
                           
@@ -346,7 +410,7 @@ export default function CartPage() {
                           <td className="p-5 text-center">
                             <button 
                               onClick={() => removeItem(item.id)} 
-                              className="text-neutral-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-colors"
+                              className="text-neutral-500 hover:text-white p-2 rounded-full hover:bg-neutral-800 transition-colors"
                               title="Remove Item"
                             >
                               <FaTrash size={16} />
@@ -364,11 +428,11 @@ export default function CartPage() {
             <div className="lg:w-1/3 flex flex-col gap-6">
               
               {/* DELIVERY ADDRESS */}
-              <div className="bg-neutral-50 rounded-3xl border border-neutral-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-5 border-b border-neutral-200 flex justify-between items-center bg-white">
-                  <h3 className="font-black text-black text-base uppercase tracking-wider">Delivery Address</h3>
+              <div className="bg-neutral-900 rounded-3xl border border-neutral-800 overflow-hidden">
+                <div className="px-6 py-5 border-b border-neutral-800 flex justify-between items-center bg-neutral-900">
+                  <h3 className="font-black text-white text-base uppercase tracking-wider">Delivery Address</h3>
                   {savedAddresses.length > 0 && (
-                     <button onClick={openAddressSidebar} className="text-black text-xs font-bold uppercase tracking-widest hover:underline transition-all">
+                     <button onClick={openAddressSidebar} className="text-white text-xs font-bold uppercase tracking-widest hover:underline transition-all">
                        Change
                      </button>
                   )}
@@ -377,24 +441,24 @@ export default function CartPage() {
                 <div className="p-6">
                   {selectedAddress ? (
                     <div className="flex items-start gap-4">
-                      <div className="bg-white border border-neutral-200 p-3 rounded-full text-black mt-1 flex-shrink-0 shadow-sm">
+                      <div className="bg-black border border-neutral-800 p-3 rounded-full text-white mt-1 flex-shrink-0">
                         <FaMapMarkerAlt size={16} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <p className="font-bold text-black text-base">{selectedAddress.name}</p>
-                          <span className="text-xs font-bold text-neutral-500 bg-white border border-neutral-200 px-2 py-1 rounded-md">{selectedAddress.mobile}</span>
+                          <p className="font-bold text-white text-base">{selectedAddress.name}</p>
+                          <span className="text-xs font-bold text-neutral-400 bg-black border border-neutral-700 px-2 py-1 rounded-md">{selectedAddress.mobile}</span>
                         </div>
-                        <p className="text-sm text-neutral-600 leading-relaxed">
+                        <p className="text-sm text-neutral-400 leading-relaxed">
                           {selectedAddress.houseNo}, {selectedAddress.roadName} <br/>
-                          {selectedAddress.city}, {selectedAddress.state} - <span className="font-bold text-black">{selectedAddress.pincode}</span>
+                          {selectedAddress.city}, {selectedAddress.state} - <span className="font-bold text-white">{selectedAddress.pincode}</span>
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center py-6 border-2 border-dashed border-neutral-300 rounded-2xl bg-white">
-                      <p className="text-neutral-500 mb-4 text-sm font-medium">No delivery address selected.</p>
-                      <button onClick={openAddressSidebar} className="inline-flex items-center justify-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl font-bold uppercase tracking-widest transition-colors text-xs shadow-md">
+                    <div className="text-center py-6 border-2 border-dashed border-neutral-700 rounded-2xl bg-black">
+                      <p className="text-neutral-400 mb-4 text-sm font-medium">No delivery address selected.</p>
+                      <button onClick={openAddressSidebar} className="inline-flex items-center justify-center gap-2 bg-white text-black px-5 py-2.5 rounded-xl font-bold uppercase tracking-widest transition-colors text-xs">
                         <FaPlus size={12} /> Add Address
                       </button>
                     </div>
@@ -403,40 +467,40 @@ export default function CartPage() {
               </div>
 
               {/* ORDER SUMMARY */}
-              <div className="bg-neutral-50 rounded-3xl border border-neutral-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-5 border-b border-neutral-200 bg-white">
-                  <h3 className="font-black text-black text-base uppercase tracking-wider">Order Summary</h3>
+              <div className="bg-neutral-900 rounded-3xl border border-neutral-800 overflow-hidden">
+                <div className="px-6 py-5 border-b border-neutral-800 bg-neutral-900">
+                  <h3 className="font-black text-white text-base uppercase tracking-wider">Order Summary</h3>
                 </div>
                 
                 <div className="p-6 space-y-4">
-                  <div className="flex justify-between text-neutral-600 text-sm font-medium">
+                  <div className="flex justify-between text-neutral-400 text-sm font-medium">
                     <span>Subtotal</span>
-                    <span className="font-bold text-black">₹{subTotal.toFixed(2)}</span>
+                    <span className="font-bold text-white">₹{subTotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-neutral-600 text-sm font-medium">
+                  <div className="flex justify-between text-neutral-400 text-sm font-medium">
                     <span>Estimated Tax (18%)</span>
-                    <span className="font-bold text-black">₹{totalTax.toFixed(2)}</span>
+                    <span className="font-bold text-white">₹{totalTax.toFixed(2)}</span>
                   </div>
                   
-                  <div className="pt-4 border-t border-neutral-200 flex justify-between items-end">
-                    <span className="text-base font-black text-black uppercase tracking-wider">Total</span>
+                  <div className="pt-4 border-t border-neutral-800 flex justify-between items-end">
+                    <span className="text-base font-black text-white uppercase tracking-wider">Total</span>
                     <div className="text-right">
-                      <span className="text-3xl font-black text-red-600">₹{grandTotal.toFixed(2)}</span>
+                      <span className="text-3xl font-black text-white">₹{grandTotal.toFixed(2)}</span>
                       <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-1">Includes all taxes</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-6 bg-white border-t border-neutral-200 space-y-3">
+                <div className="p-6 bg-neutral-900 border-t border-neutral-800 space-y-3">
                   <button 
                     onClick={handleCheckout} 
-                    className="w-full h-14 bg-red-600 text-white text-sm font-black tracking-widest uppercase rounded-xl hover:bg-red-700 transition-all flex items-center justify-center shadow-lg"
+                    className="w-full h-14 bg-white text-black text-sm font-black tracking-widest uppercase rounded-xl hover:bg-neutral-200 transition-all flex items-center justify-center"
                   >
                     Proceed to Checkout
                   </button>
                   <button 
                     onClick={() => router.push('/')}
-                    className="w-full h-14 bg-transparent border-2 border-neutral-200 text-black text-sm font-black tracking-widest uppercase rounded-xl hover:border-black transition-all flex items-center justify-center"
+                    className="w-full h-14 bg-transparent border-2 border-neutral-800 text-white text-sm font-black tracking-widest uppercase rounded-xl hover:border-white transition-all flex items-center justify-center"
                   >
                     Continue Shopping
                   </button>
@@ -447,19 +511,19 @@ export default function CartPage() {
           </div>
         )}
 
-        {/* ADDRESS SIDEBAR (Modern Overlay Panel) */}
+        {/* ADDRESS SIDEBAR (Dark Mode Overlay Panel) */}
         {isSidebarOpen && (
           <div className="fixed inset-0 z-[999] flex justify-end">
             
-            {/* Dark Overlay (Left intact as it's just a shadow overlay, not part of dark mode styling) */}
+            {/* Dark Overlay */}
             <div 
-              className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm transition-opacity" 
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" 
               onClick={() => setIsSidebarOpen(false)}
             ></div>
             
             {/* Sidebar Panel */}
             <div 
-              className="relative w-full sm:w-[450px] bg-white border-l border-neutral-200 h-full shadow-2xl flex flex-col z-10"
+              className="relative w-full sm:w-[450px] bg-neutral-950 border-l border-neutral-800 h-full shadow-2xl flex flex-col z-10"
               style={{ animation: 'slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
             >
               <style>{`
@@ -470,25 +534,25 @@ export default function CartPage() {
               `}</style>
 
               {/* Sidebar Header */}
-              <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-neutral-50">
+              <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-neutral-900">
                 <div className="flex items-center gap-3">
                   {/* BACK BUTTON */}
                   {isAddingNew && savedAddresses.length > 0 && (
                     <button 
                       onClick={handleSidebarBack}
-                      className="p-2 -ml-2 text-neutral-500 hover:text-black hover:bg-neutral-200 rounded-full transition-colors"
+                      className="p-2 -ml-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-full transition-colors"
                       title="Back to saved addresses"
                     >
                       <FaArrowLeft size={16} />
                     </button>
                   )}
-                  <h3 className="text-lg font-black text-black uppercase tracking-wider">
+                  <h3 className="text-lg font-black text-white uppercase tracking-wider">
                     {isAddingNew ? (isEditingId ? "Edit Address" : "Add New Address") : "Delivery Address"}
                   </h3>
                 </div>
                 <button 
                   onClick={() => setIsSidebarOpen(false)}
-                  className="p-2 text-neutral-400 hover:text-black bg-white border border-neutral-200 hover:border-black rounded-full transition-colors shadow-sm"
+                  className="p-2 text-neutral-400 hover:text-white bg-black border border-neutral-800 hover:border-white rounded-full transition-colors"
                   title="Close"
                 >
                   <FaTimes size={14} />
@@ -496,7 +560,7 @@ export default function CartPage() {
               </div>
 
               {/* Sidebar Body */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 hide-scrollbar bg-white">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 hide-scrollbar bg-neutral-950">
                 
                 {!isAddingNew ? (
                   <>
@@ -506,7 +570,7 @@ export default function CartPage() {
                         setIsEditingId(null);
                         setIsAddingNew(true);
                       }}
-                      className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-neutral-300 rounded-2xl text-black hover:bg-neutral-50 hover:border-black transition-colors font-bold uppercase tracking-widest text-xs shadow-sm"
+                      className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-neutral-700 rounded-2xl text-white hover:bg-neutral-900 hover:border-white transition-colors font-bold uppercase tracking-widest text-xs"
                     >
                       <FaPlus size={12} /> Add a New Address
                     </button>
@@ -520,35 +584,35 @@ export default function CartPage() {
                             onClick={() => handleSelectAddress(addr)}
                             className={`relative border-2 rounded-2xl p-5 cursor-pointer transition-all group ${
                               isSelected 
-                                ? "border-black bg-neutral-50 shadow-md scale-[1.02]" 
-                                : "border-neutral-200 bg-white hover:border-black"
+                                ? "border-white bg-neutral-900 scale-[1.02]" 
+                                : "border-neutral-800 bg-black hover:border-neutral-600"
                             }`}
                           >
                             {isSelected && (
-                              <FaCheckCircle className="absolute top-5 right-5 text-black" size={20} />
+                              <FaCheckCircle className="absolute top-5 right-5 text-white" size={20} />
                             )}
                             
                             <div className="flex justify-between items-start mb-2 pr-8">
                               <div className="flex items-center gap-3">
-                                <p className="font-bold text-black text-base">
+                                <p className="font-bold text-white text-base">
                                   {addr.name}
                                 </p>
-                                <span className="text-xs font-bold text-neutral-500 bg-white border border-neutral-200 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                <span className="text-xs font-bold text-neutral-400 bg-black border border-neutral-700 px-2 py-0.5 rounded-md uppercase tracking-wider">
                                   {addr.mobile}
                                 </span>
                               </div>
                             </div>
                             
-                            <p className="text-sm text-neutral-600 leading-relaxed mt-2 pr-8">
+                            <p className="text-sm text-neutral-400 leading-relaxed mt-2 pr-8">
                               {addr.houseNo}, {addr.roadName} <br/>
-                              {addr.city}, {addr.state} - <span className="font-bold text-black">{addr.pincode}</span>
+                              {addr.city}, {addr.state} - <span className="font-bold text-white">{addr.pincode}</span>
                             </p>
 
-                            {/* Edit Button - Visible on hover or when selected */}
+                            {/* Edit Button */}
                             <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 onClick={(e) => handleEditAddress(e, addr)}
-                                className="text-neutral-600 hover:text-black p-2.5 bg-white shadow-sm border border-neutral-200 hover:border-black rounded-xl transition-colors"
+                                className="text-neutral-400 hover:text-white p-2.5 bg-black border border-neutral-700 hover:border-white rounded-xl transition-colors"
                                 title="Edit Address"
                               >
                                 <FaEdit size={14} />
@@ -567,28 +631,28 @@ export default function CartPage() {
                     <div className="space-y-4">
                       <h4 className="text-xs font-black text-neutral-500 uppercase tracking-widest">Contact Info</h4>
                       <div>
-                        <input required type="text" name="name" value={addressForm.name} onChange={handleAddressChange} placeholder="Full Name" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
+                        <input required type="text" name="name" value={addressForm.name} onChange={handleAddressChange} placeholder="Full Name" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
                       </div>
                       <div>
-                        <input required type="tel" name="mobile" value={addressForm.mobile} onChange={handleAddressChange} placeholder="Mobile Number" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
+                        <input required type="tel" name="mobile" value={addressForm.mobile} onChange={handleAddressChange} placeholder="Mobile Number" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
                       </div>
                     </div>
                     
-                    <hr className="border-t border-neutral-200" />
+                    <hr className="border-t border-neutral-800" />
                     
                     {/* Location Section */}
                     <div className="space-y-4">
                       <h4 className="text-xs font-black text-neutral-500 uppercase tracking-widest">Location</h4>
                       <div>
-                        <input required type="text" name="houseNo" value={addressForm.houseNo} onChange={handleAddressChange} placeholder="House No / Building Name" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
+                        <input required type="text" name="houseNo" value={addressForm.houseNo} onChange={handleAddressChange} placeholder="House No / Building Name" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
                       </div>
                       <div>
-                        <input required type="text" name="roadName" value={addressForm.roadName} onChange={handleAddressChange} placeholder="Road Name / Area / Colony" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
+                        <input required type="text" name="roadName" value={addressForm.roadName} onChange={handleAddressChange} placeholder="Road Name / Area / Colony" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4">
-                        <input required type="number" name="pincode" value={addressForm.pincode} onChange={handleAddressChange} placeholder="Pincode" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
-                        <input required type="text" name="city" value={addressForm.city} onChange={handleAddressChange} placeholder="City" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
+                        <input required type="number" name="pincode" value={addressForm.pincode} onChange={handleAddressChange} placeholder="Pincode" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
+                        <input required type="text" name="city" value={addressForm.city} onChange={handleAddressChange} placeholder="City" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
                       </div>
 
                       <div>
@@ -597,17 +661,17 @@ export default function CartPage() {
                           name="state" 
                           value={addressForm.state} 
                           onChange={handleAddressChange} 
-                          className={`w-full bg-white border border-neutral-200 text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm ${addressForm.state === "" ? "text-neutral-400" : "text-black"}`}
+                          className={`w-full bg-black border border-neutral-800 text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all ${addressForm.state === "" ? "text-neutral-600" : "text-white"}`}
                         >
-                          <option value="" disabled>Select State</option>
+                          <option value="" disabled className="text-neutral-600">Select State</option>
                           {INDIAN_STATES.map((state) => (
-                            <option key={state} value={state} className="text-black">{state}</option>
+                            <option key={state} value={state} className="text-white bg-black">{state}</option>
                           ))}
                         </select>
                       </div>
 
                       <div>
-                        <input type="text" name="landmark" value={addressForm.landmark} onChange={handleAddressChange} placeholder="Nearby Landmark (Optional)" className="w-full bg-white border border-neutral-200 text-black text-sm rounded-xl focus:ring-2 focus:ring-black focus:border-transparent block p-4 outline-none transition-all shadow-sm" />
+                        <input type="text" name="landmark" value={addressForm.landmark} onChange={handleAddressChange} placeholder="Nearby Landmark (Optional)" className="w-full bg-black border border-neutral-800 text-white text-sm rounded-xl focus:ring-2 focus:ring-white focus:border-transparent block p-4 outline-none transition-all placeholder-neutral-600" />
                       </div>
                     </div>
                   </form>
@@ -615,13 +679,13 @@ export default function CartPage() {
               </div>
 
               {/* Sidebar Footer */}
-              <div className="p-6 border-t border-neutral-200 bg-neutral-50 flex gap-4">
+              <div className="p-6 border-t border-neutral-800 bg-neutral-900 flex gap-4">
                 {isAddingNew ? (
                   <>
                     {savedAddresses.length > 0 && (
                       <button 
                         onClick={handleSidebarBack} 
-                        className="flex-1 py-4 bg-transparent border-2 border-neutral-200 hover:border-black rounded-xl text-black font-black uppercase tracking-widest text-xs transition-colors"
+                        className="flex-1 py-4 bg-transparent border-2 border-neutral-700 hover:border-white rounded-xl text-white font-black uppercase tracking-widest text-xs transition-colors"
                       >
                         Cancel
                       </button>
@@ -629,7 +693,7 @@ export default function CartPage() {
                     <button 
                       type="submit" 
                       form="address-form" 
-                      className="flex-1 bg-black text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-neutral-800 transition-colors"
+                      className="flex-1 bg-white text-black py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-neutral-200 transition-colors"
                     >
                       {isEditingId ? "Update" : "Save"}
                     </button>
@@ -637,7 +701,7 @@ export default function CartPage() {
                 ) : (
                   <button 
                     onClick={() => setIsSidebarOpen(false)}
-                    className="w-full bg-black text-white py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-lg hover:bg-neutral-800 transition-colors"
+                    className="w-full bg-white text-black py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-neutral-200 transition-colors"
                   >
                     Use this Address
                   </button>

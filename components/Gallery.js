@@ -95,7 +95,7 @@ const Gallery = () => {
             <img 
               src={slide.imageUrl} 
               alt={slide.title} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
             
             {/* Gradient Overlay for Text Readability */}

@@ -277,39 +277,40 @@ export default function Header() {
       <header className="w-full z-[100] sticky top-0 flex flex-col font-sans drop-shadow-md">
        
         {/* ================= ROW 1: TOP UTILITY BAR (Desktop) ================= */}
-        <div className="hidden lg:flex w-full items-center justify-between px-8 py-2 bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 transition-colors">
-          <div className="flex items-center gap-6 text-[10px] font-black tracking-widest text-neutral-900 dark:text-white">
+        <div className="hidden lg:flex w-full items-center justify-between px-8 py-2 bg-neutral-950 border-b border-neutral-900 transition-colors">
+          <div className="flex items-center gap-6 text-[10px] font-black tracking-widest text-neutral-300">
             <div className="flex items-center gap-2">
-              <span className="text-red-600"><FaPhoneAlt size={10} /></span>
+              <span className="text-white"><FaPhoneAlt size={10} /></span>
               <span>+91 9155242261</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-red-600"><FaEnvelope size={10} /></span>
+              <span className="text-white"><FaEnvelope size={10} /></span>
               <span>nagina3dprinter@gmail.com</span>
             </div>
           </div>
         </div>
 
         {/* ================= ROW 2: MAIN HEADER ================= */}
-        <div className="w-full bg-black transition-all duration-300">
+        <div className="w-full bg-black border-b border-neutral-900 transition-all duration-300">
           <div className="max-w-[1500px] mx-auto flex items-center justify-between h-16 px-4 md:px-8 gap-4 lg:gap-8">
            
             {/* LEFT: LOGO & MOBILE TOGGLE */}
             <div className="flex items-center gap-3 shrink-0">
               <button
-                className="lg:hidden text-lg p-1 text-white hover:text-red-500 transition-colors"
+                className="lg:hidden text-lg p-1 text-white hover:text-neutral-400 transition-colors"
                 onClick={() => setSidebarOpen(true)}
               >
                 <FaBars />
               </button>
               <div
-                className="cursor-pointer flex items-center transition-transform active:scale-95  rounded-lg p-1"
+                className="cursor-pointer flex items-center transition-transform active:scale-95 rounded-lg p-1"
                 onClick={() => router.push("/")}
               >
+                {/* Ensure logo works well on black. Might need a white version of the logo depending on the original asset. */}
                 <img
-                  src="/logo.jpeg"
+                  src="/logo.png"
                   alt="Logo"
-                  className="object-contain h-16 mt-4 w-auto md:h-20"
+                  className="object-contain h-12 mt-4 w-auto md:h-20"
                 />
               </div>
             </div>
@@ -318,7 +319,7 @@ export default function Header() {
             <div className="hidden md:flex flex-1 max-w-4xl mx-auto relative" ref={searchRef}>
               <form
                 onSubmit={handleSearchSubmit}
-                className="flex-1 h-10 bg-white rounded-xl overflow-hidden border-2 border-transparent focus-within:border-red-600 transition-all w-full"
+                className="flex-1 h-10 bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 focus-within:border-white transition-all w-full flex"
               >
                 <input
                   type="text"
@@ -328,35 +329,35 @@ export default function Header() {
                     if (searchQuery.trim().length > 0) setShowSuggestions(true);
                   }}
                   placeholder="SEARCH FOR PRODUCTS..."
-                  className="flex-1 h-full px-4 outline-none text-black text-[10px] font-black uppercase tracking-widest w-full"
+                  className="flex-1 h-full px-4 bg-transparent outline-none text-white placeholder-neutral-500 text-[10px] font-black uppercase tracking-widest w-full"
                 />
-                <button type="submit" className="absolute right-0 top-0 bg-red-600 hover:bg-red-700 transition-colors w-14 h-full flex items-center justify-center text-white text-sm">
+                <button type="submit" className="bg-white hover:bg-neutral-200 transition-colors w-14 h-full flex items-center justify-center text-black text-sm">
                   <FaSearch />
                 </button>
               </form>
 
               {/* Desktop Suggestions Dropdown */}
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white dark:bg-neutral-950 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 z-[110] max-h-[320px] overflow-auto py-2">
+                <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-neutral-950 rounded-xl shadow-2xl border border-neutral-800 z-[110] max-h-[320px] overflow-auto py-2">
                   {suggestions.map((product) => (
                     <div
                       key={product.id}
                       onClick={() => handleSuggestionClick(product)}
-                      className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-900 cursor-pointer flex items-center gap-3 border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                      className="px-4 py-3 hover:bg-neutral-900 cursor-pointer flex items-center gap-3 border-b border-neutral-800 last:border-0"
                     >
                       {product.image && (
                         <img
                           src={product.image}
                           alt={product.name}
-                          className="w-10 h-10 object-contain rounded-lg border border-neutral-200"
+                          className="w-10 h-10 object-contain rounded-lg border border-neutral-800 bg-white"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-neutral-900 dark:text-white truncate">
+                        <p className="text-sm font-bold text-white truncate">
                           {product.name}
                         </p>
                         {product.price && (
-                          <p className="text-xs text-red-600 font-black">₹{product.price}</p>
+                          <p className="text-xs text-neutral-400 font-black">₹{product.price}</p>
                         )}
                       </div>
                     </div>
@@ -370,7 +371,7 @@ export default function Header() {
              
               {/* Mobile Search Toggle */}
               <button
-                className="md:hidden text-white text-lg p-1 hover:text-red-500 transition-colors"
+                className="md:hidden text-white text-lg p-1 hover:text-neutral-400 transition-colors"
                 onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
               >
                 <FaSearch />
@@ -379,7 +380,7 @@ export default function Header() {
               {/* Login / User */}
               <div className="relative group cursor-pointer" ref={userRef}>
                 <div
-                  className="flex items-center gap-2 text-white hover:text-red-500 transition-colors"
+                  className="flex items-center gap-2 text-white hover:text-neutral-400 transition-colors"
                   onClick={() => {
                     if (user) setUserDropdownOpen(!userDropdownOpen);
                     else router.push("/login");
@@ -398,16 +399,16 @@ export default function Header() {
                 {/* User Dropdown */}
                 {user && (
                   <div className={`absolute right-0 top-[100%] mt-0 w-48 z-[110] ${userDropdownOpen ? 'block' : 'hidden group-hover:lg:block'}`}>
-                    <div className="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 py-2 overflow-hidden">
-                      <div className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-neutral-100 dark:border-neutral-800 truncate">
+                    <div className="bg-neutral-950 text-white rounded-xl shadow-2xl border border-neutral-800 py-2 overflow-hidden mt-4">
+                      <div className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-neutral-800 truncate text-neutral-400">
                         {user.phoneNumber || "MY ACCOUNT"}
                       </div>
-                      <a href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors">
+                      <a href="/orders" className="block px-4 py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-900 transition-colors">
                         ORDERS
                       </a>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors"
+                        className="block w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-neutral-900 transition-colors"
                       >
                         LOGOUT
                       </button>
@@ -420,16 +421,16 @@ export default function Header() {
               <div className="relative" ref={cartRef}>
                 <div
                   onClick={handleCartClick}
-                  className="relative cursor-pointer text-white hover:text-red-500 transition-colors flex items-center"
+                  className="relative cursor-pointer text-white hover:text-neutral-400 transition-colors flex items-center"
                 >
                   <FaShoppingCart size={20} />
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] font-black h-[16px] w-[16px] rounded-full flex items-center justify-center shadow-sm">
+                  <span className="absolute -top-2 -right-2 bg-white text-black text-[9px] font-black h-[16px] w-[16px] rounded-full flex items-center justify-center shadow-sm">
                     {cartItems.length}
                   </span>
                 </div>
                 {/* Cart Dropdown */}
                 {cartOpen && (
-                  <div className="hidden lg:block absolute right-0 mt-6 w-[320px] bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white shadow-2xl border border-neutral-200 dark:border-neutral-800 rounded-2xl z-[110] overflow-hidden">
+                  <div className="hidden lg:block absolute right-0 mt-6 w-[320px] bg-neutral-950 text-white shadow-2xl border border-neutral-800 rounded-2xl z-[110] overflow-hidden">
                     <CartContent
                       cartItems={cartItems}
                       subTotal={subTotal}
@@ -447,9 +448,9 @@ export default function Header() {
         </div>
 
         {/* ================= ROW 3: CATEGORY NAV BAR ================= */}
-        <div className="hidden lg:block w-full bg-neutral-900 border-t border-neutral-800">
+        <div className="hidden lg:block w-full bg-neutral-950 border-b border-neutral-900">
           <div className="max-w-[1500px] mx-auto px-4 md:px-8 h-10 flex items-center">
-            <ul className="flex items-center gap-6 xl:gap-8 text-[10px] font-black uppercase tracking-widest text-white w-full flex-wrap">
+            <ul className="flex items-center gap-6 xl:gap-8 text-[10px] font-black uppercase tracking-widest text-neutral-400 w-full flex-wrap">
              
               {/* Dynamic Firebase Categories (Limit to 8) */}
               {!loadingCategories && categories.slice(0, 8).map((cat) => {
@@ -466,7 +467,7 @@ export default function Header() {
                     onMouseLeave={() => setOpenDesktopDropdown(null)}
                   >
                     <div className={`flex items-center gap-1.5 transition-colors px-2 py-1 rounded ${
-                        isHomeKitchen ? "bg-red-600 text-white" : "hover:text-red-500"
+                        isHomeKitchen ? "bg-white text-black" : "hover:text-white"
                     }`}>
                       {cat.name}
                       {catSubs.length > 0 && (
@@ -480,7 +481,7 @@ export default function Header() {
                     </div>
                     {openDesktopDropdown === cat.id && catSubs.length > 0 && (
                       <div className="absolute top-[100%] left-0 z-[110] w-56 pt-2">
-                        <div className="bg-white dark:bg-neutral-950 shadow-xl rounded-xl border border-neutral-200 dark:border-neutral-800 py-2 overflow-hidden">
+                        <div className="bg-neutral-950 shadow-2xl rounded-xl border border-neutral-800 py-2 overflow-hidden">
                           {catSubs.map((sub) => (
                             <p
                               key={`desktop-sub-${sub.id}`}
@@ -489,7 +490,7 @@ export default function Header() {
                                 router.push(`/subactegory?categoryId=${cat.id}&subcategoryId=${sub.id}&categoryName=${encodeURIComponent(cat.name)}&subcategoryName=${encodeURIComponent(sub.name)}`);
                                 setOpenDesktopDropdown(null);
                               }}
-                              className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white transition-colors"
+                              className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
                             >
                               {sub.name}
                             </p>
@@ -504,7 +505,7 @@ export default function Header() {
               {/* 'More' Dropdown for remaining Categories (> 8) */}
               {!loadingCategories && categories.length > 8 && (
                 <li className="relative group/more h-10 flex items-center cursor-pointer whitespace-nowrap">
-                  <div className="flex items-center gap-1.5 transition-colors px-2 py-1 rounded hover:text-red-500 text-white">
+                  <div className="flex items-center gap-1.5 transition-colors px-2 py-1 rounded hover:text-white text-neutral-400">
                     MORE
                     <FaChevronDown
                       size={8}
@@ -513,7 +514,7 @@ export default function Header() {
                   </div>
                   {/* Dropdown 1: Remaining Categories */}
                   <div className="absolute top-[100%] right-0 z-[110] w-56 pt-2 hidden group-hover/more:block">
-                    <div className="bg-white dark:bg-neutral-950 shadow-xl rounded-xl border border-neutral-200 dark:border-neutral-800 py-2">
+                    <div className="bg-neutral-950 shadow-2xl rounded-xl border border-neutral-800 py-2">
                      
                       {categories.slice(8).map((moreCat) => {
                         const moreCatSubs = subcategories.filter(
@@ -521,7 +522,7 @@ export default function Header() {
                         );
                         return (
                           <div key={`more-${moreCat.id}`} className="relative group/sub">
-                            <div className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white transition-colors flex justify-between items-center">
+                            <div className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors flex justify-between items-center">
                               <span>{moreCat.name}</span>
                               {moreCatSubs.length > 0 && (
                                 <FaChevronDown size={8} className="-rotate-90" />
@@ -530,7 +531,7 @@ export default function Header() {
                             {/* Dropdown 2: Subcategories */}
                             {moreCatSubs.length > 0 && (
                               <div className="absolute top-0 right-full z-[111] w-56 pr-2 hidden group-hover/sub:block">
-                                <div className="bg-white dark:bg-neutral-950 shadow-xl rounded-xl border border-neutral-200 dark:border-neutral-800 py-2">
+                                <div className="bg-neutral-950 shadow-2xl rounded-xl border border-neutral-800 py-2">
                                   {moreCatSubs.map((sub) => (
                                     <p
                                       key={`more-sub-${sub.id}`}
@@ -544,7 +545,7 @@ export default function Header() {
                                           )}`
                                         );
                                       }}
-                                      className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-black dark:hover:text-white transition-colors"
+                                      className="px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:bg-neutral-900 hover:text-white transition-colors"
                                     >
                                       {sub.name}
                                     </p>
@@ -566,11 +567,11 @@ export default function Header() {
         {/* ================= MOBILE SEARCH BAR (Toggleable) with Suggestions ================= */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 bg-black ${
-            mobileSearchOpen ? 'max-h-[400px] opacity-100 py-3 px-4 border-t border-neutral-800' : 'max-h-0 opacity-0 py-0 px-4'
+            mobileSearchOpen ? 'max-h-[400px] opacity-100 py-3 px-4 border-b border-neutral-900' : 'max-h-0 opacity-0 py-0 px-4'
           }`}
         >
           <div className="relative" ref={searchRef}>
-            <form onSubmit={handleSearchSubmit} className="flex items-center bg-white rounded-xl overflow-hidden w-full h-11">
+            <form onSubmit={handleSearchSubmit} className="flex items-center bg-neutral-900 rounded-xl overflow-hidden w-full h-11 border border-neutral-800 focus-within:border-white">
               <input
                 type="text"
                 value={searchQuery}
@@ -579,35 +580,35 @@ export default function Header() {
                   if (searchQuery.trim().length > 0) setShowSuggestions(true);
                 }}
                 placeholder="SEARCH PRODUCTS..."
-                className="flex-1 px-4 py-2 bg-transparent outline-none text-[10px] font-black uppercase tracking-widest text-black"
+                className="flex-1 px-4 py-2 bg-transparent outline-none text-[10px] font-black uppercase tracking-widest text-white placeholder-neutral-500"
               />
-              <button type="submit" className="bg-red-600 h-full w-12 flex items-center justify-center text-white">
+              <button type="submit" className="bg-white h-full w-12 flex items-center justify-center text-black">
                 <FaSearch />
               </button>
             </form>
 
             {/* Mobile Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-neutral-950 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-800 z-[110] max-h-[280px] overflow-auto py-2">
+              <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-neutral-950 rounded-xl shadow-2xl border border-neutral-800 z-[110] max-h-[280px] overflow-auto py-2">
                 {suggestions.map((product) => (
                   <div
                     key={product.id}
                     onClick={() => handleSuggestionClick(product)}
-                    className="px-4 py-3 hover:bg-neutral-50 dark:hover:bg-neutral-900 cursor-pointer flex items-center gap-3 border-b border-neutral-100 dark:border-neutral-800 last:border-0"
+                    className="px-4 py-3 hover:bg-neutral-900 cursor-pointer flex items-center gap-3 border-b border-neutral-800 last:border-0"
                   >
                     {product.image && (
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-10 h-10 object-contain rounded-lg border border-neutral-200"
+                        className="w-10 h-10 object-contain rounded-lg border border-neutral-800 bg-white"
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-neutral-900 dark:text-white truncate">
+                      <p className="text-sm font-bold text-white truncate">
                         {product.name}
                       </p>
                       {product.price && (
-                        <p className="text-xs text-red-600 font-black">₹{product.price}</p>
+                        <p className="text-xs text-neutral-400 font-black">₹{product.price}</p>
                       )}
                     </div>
                   </div>
@@ -620,13 +621,13 @@ export default function Header() {
 
       {/* ================= MOBILE CATEGORIES SIDEBAR ================= */}
       <div
-        className={`fixed top-0 left-0 h-full w-[280px] bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white z-[120] transform transition-transform duration-300 shadow-2xl flex flex-col border-r border-neutral-200 dark:border-neutral-800 ${
+        className={`fixed top-0 left-0 h-full w-[280px] bg-neutral-950 text-white z-[120] transform transition-transform duration-300 shadow-2xl flex flex-col border-r border-neutral-900 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="px-5 py-4 font-black uppercase tracking-widest text-xs flex justify-end items-center shrink-0 border-b border-neutral-200 dark:border-neutral-800">
+        <div className="px-5 py-4 font-black uppercase tracking-widest text-xs flex justify-end items-center shrink-0 border-b border-neutral-900">
           <button
-            className="text-neutral-400 dark:text-neutral-500 hover:text-black dark:hover:text-white text-lg transition-colors"
+            className="text-neutral-500 hover:text-white text-lg transition-colors"
             onClick={() => setSidebarOpen(false)}
           >
             <FaTimes />
@@ -635,12 +636,12 @@ export default function Header() {
         <div className="flex-1 overflow-y-auto hide-scrollbar pb-20">
           {loadingCategories ? (
             <div className="p-8 flex justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-black dark:border-white"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
             </div>
           ) : (
-            <ul className="text-[10px] font-black uppercase tracking-widest">
+            <ul className="text-[10px] font-black uppercase tracking-widest text-neutral-400">
               <li
-                className="border-b border-neutral-100 dark:border-neutral-800 px-5 py-4 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors"
+                className="border-b border-neutral-900 px-5 py-4 cursor-pointer hover:bg-neutral-900 hover:text-white transition-colors"
                 onClick={() => { router.push('/'); setSidebarOpen(false); }}
               >
                 HOME
@@ -652,30 +653,30 @@ export default function Header() {
                   );
                   const isExpanded = expandedMobileCat === cat.id;
                   return (
-                    <li key={`mobile-${cat.id}`} className="border-b border-neutral-100 dark:border-neutral-800 flex flex-col">
+                    <li key={`mobile-${cat.id}`} className="border-b border-neutral-900 flex flex-col">
                       <div
                         onClick={() => handleMobileCatClick(cat.id)}
                         className={`px-5 py-4 cursor-pointer transition-colors flex items-center justify-between ${
                           isExpanded
-                            ? "bg-neutral-50 dark:bg-neutral-900 text-black dark:text-white"
-                            : "hover:bg-neutral-50 dark:hover:bg-neutral-900 text-neutral-600 dark:text-neutral-400"
+                            ? "bg-neutral-900 text-white"
+                            : "hover:bg-neutral-900 hover:text-white"
                         }`}
                       >
                         <span>{cat.name}</span>
                         {catSubs.length > 0 && (
                           <FaChevronDown
                             size={10}
-                            className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-black dark:text-white' : ''}`}
+                            className={`transition-transform duration-300 ${isExpanded ? 'rotate-180 text-white' : ''}`}
                           />
                         )}
                       </div>
                       {catSubs.length > 0 && (
                         <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out bg-neutral-50/50 dark:bg-neutral-950 ${
+                          className={`overflow-hidden transition-all duration-300 ease-in-out bg-black ${
                             isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
                           }`}
                         >
-                          <ul className="py-2 border-t border-neutral-100 dark:border-neutral-800">
+                          <ul className="py-2 border-t border-neutral-900">
                             {catSubs.map((sub) => (
                               <li
                                 key={`mobile-sub-${sub.id}`}
@@ -683,9 +684,9 @@ export default function Header() {
                                   router.push(`/subactegory?categoryId=${cat.id}&subcategoryId=${sub.id}&categoryName=${encodeURIComponent(cat.name)}&subcategoryName=${encodeURIComponent(sub.name)}`);
                                   setSidebarOpen(false);
                                 }}
-                                className="px-8 py-3 text-[10px] font-bold text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+                                className="px-8 py-3 text-[10px] font-bold text-neutral-500 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
                               >
-                                <span className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700"></span>
+                                <span className="w-1 h-1 rounded-full bg-neutral-700"></span>
                                 {sub.name}
                               </li>
                             ))}
@@ -696,7 +697,7 @@ export default function Header() {
                   );
                 })
               ) : (
-                <li className="px-5 py-6 text-neutral-400 italic text-center">
+                <li className="px-5 py-6 text-neutral-600 italic text-center">
                   NO CATEGORIES
                 </li>
               )}
@@ -707,7 +708,7 @@ export default function Header() {
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-[110] lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -739,7 +740,7 @@ function CartContent({
         <p className="text-neutral-500 text-[10px] font-black uppercase tracking-widest">YOUR CART IS EMPTY</p>
         <button
           onClick={close}
-          className="mt-6 bg-black text-white dark:bg-white dark:text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
+          className="mt-6 bg-white text-black px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-neutral-200 transition-colors"
         >
           CONTINUE SHOPPING
         </button>
@@ -747,21 +748,21 @@ function CartContent({
     );
   }
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
+    <div className="flex flex-col h-full bg-neutral-950">
       <div className="p-4 space-y-4 overflow-y-auto max-h-[55vh] flex-1 hide-scrollbar">
         {cartItems.map((item) => (
           <div
             key={item.id}
-            className="flex items-start justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4 last:border-0 last:pb-0"
+            className="flex items-start justify-between border-b border-neutral-900 pb-4 last:border-0 last:pb-0"
           >
             <div className="flex gap-3 items-center w-full pr-2">
               <img
                 src={item.image || "/placeholder.png"}
-                className="w-14 h-14 object-contain rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 p-1"
+                className="w-14 h-14 object-contain rounded-xl border border-neutral-800 bg-white p-1"
                 alt={item.productName}
               />
               <div className="flex-1">
-                <p className="font-bold text-xs text-neutral-900 dark:text-white line-clamp-1">
+                <p className="font-bold text-xs text-white line-clamp-1">
                   {item.productName}
                 </p>
                 {item.variant?.optionValue && (
@@ -770,59 +771,59 @@ function CartContent({
                   </p>
                 )}
                 <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center border-2 border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden h-6">
+                  <div className="flex items-center border border-neutral-800 bg-neutral-900 rounded-lg overflow-hidden h-6">
                     <button
                       onClick={() =>
                         updateQuantity(item.id, item.quantity, -1, item.variant?.stock)
                       }
-                      className="px-2 h-full bg-transparent text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors flex items-center justify-center"
+                      className="px-2 h-full bg-transparent text-neutral-400 hover:bg-neutral-800 transition-colors flex items-center justify-center"
                       disabled={item.quantity <= 1}
                     >
                       −
                     </button>
-                    <span className="px-2 text-[10px] font-black text-neutral-900 dark:text-white border-x-2 border-neutral-200 dark:border-neutral-700 h-full flex items-center justify-center">
+                    <span className="px-2 text-[10px] font-black text-white border-x border-neutral-800 h-full flex items-center justify-center">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() =>
                         updateQuantity(item.id, item.quantity, 1, item.variant?.stock)
                       }
-                      className="px-2 h-full bg-transparent text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors flex items-center justify-center"
+                      className="px-2 h-full bg-transparent text-neutral-400 hover:bg-neutral-800 transition-colors flex items-center justify-center"
                       disabled={item.variant?.stock && item.quantity >= item.variant.stock}
                     >
                       +
                     </button>
                   </div>
-                  <span className="font-black text-sm text-neutral-900 dark:text-white">₹{item.price}</span>
+                  <span className="font-black text-sm text-white">₹{item.price}</span>
                 </div>
               </div>
             </div>
             <button
               onClick={() => removeItem(item.id)}
-              className="text-neutral-400 hover:text-red-600 dark:hover:text-red-500 transition-colors p-1"
+              className="text-neutral-500 hover:text-red-500 transition-colors p-1"
             >
               <FaTimes size={12} />
             </button>
           </div>
         ))}
       </div>
-      <div className="bg-neutral-50 dark:bg-neutral-900/50 border-t border-neutral-200 dark:border-neutral-800 mt-auto shrink-0">
+      <div className="bg-neutral-900/50 border-t border-neutral-900 mt-auto shrink-0">
         <div className="px-5 py-4 space-y-2">
-          <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+          <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-neutral-500">
             <span>SUBTOTAL</span>
-            <span className="text-neutral-900 dark:text-white">
+            <span className="text-white">
               ₹{subTotal.toFixed(2)}
             </span>
           </div>
-          <div className="flex justify-between font-black text-base text-neutral-900 dark:text-white pt-2 border-t border-neutral-200 dark:border-neutral-700">
-            <span className="uppercase tracking-widest text-[10px] self-end pb-1">TOTAL</span>
-            <span className="text-red-600">₹{subTotal.toFixed(2)}</span>
+          <div className="flex justify-between font-black text-base text-white pt-2 border-t border-neutral-900">
+            <span className="uppercase tracking-widest text-[10px] self-end pb-1 text-neutral-400">TOTAL</span>
+            <span className="text-white">₹{subTotal.toFixed(2)}</span>
           </div>
         </div>
         <div className="px-4 pb-4">
           <a
-           href="/cart/Cart-page"
-            className="w-full bg-black px-4 pb-4 cursor-pointer text-white dark:bg-white dark:text-black font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors text-[10px] shadow-sm"
+           href="/cart"
+            className="block text-center w-full bg-white text-black font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-neutral-200 transition-colors text-[10px] shadow-sm"
           >
             VIEW CART / CHECKOUT
           </a>
