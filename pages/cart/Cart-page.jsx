@@ -72,7 +72,7 @@ export default function CartPage() {
       return;
     }
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`; // ← Replace with your actual Google Maps API Key
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBXUA8zAYs8WHNYe0-M-h1WvRHbncj1r0g&libraries=places`; // ← Replace with your actual Google Maps API Key
     script.async = true;
     script.defer = true;
     script.onload = () => setGoogleLoaded(true);
