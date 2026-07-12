@@ -822,7 +822,7 @@ function CartContent({
         </div>
         <div className="px-4 pb-4">
           <a
-           href="/cart"
+           href="/cart/Cart-page"
             className="block text-center w-full bg-white text-black font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-neutral-200 transition-colors text-[10px] shadow-sm"
           >
             VIEW CART / CHECKOUT

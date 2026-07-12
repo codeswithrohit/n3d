@@ -36,7 +36,7 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [userMobile, setUserMobile] = useState("");
   // Address & Order State
   const [deliveryAddress, setDeliveryAddress] = useState(null);
   const [comments, setComments] = useState('');
@@ -57,6 +57,16 @@ export default function CheckoutPage() {
       setUser(currentUser);
 
       try {
+        // === NEW: Fetch the real mobile number from n3duser ===
+        let realMobile = currentUser.phoneNumber || "";
+        const userDocRef = await db.collection('n3duser').doc(currentUser.uid).get();
+        if (userDocRef.exists) {
+          const uData = userDocRef.data();
+          console.log("udata",uData)
+          realMobile = uData.mobileNumber || uData.phoneNumber || realMobile;
+        }
+        setUserMobile(realMobile);
+        // ========================
         let finalAddressData = null;
         const savedAddressId = localStorage.getItem('selectedCheckoutAddressId');
 
@@ -112,7 +122,7 @@ export default function CheckoutPage() {
 
     return () => unsubscribe();
   }, [router]);
-
+console.log("usermobile",userMobile)
   // Calculations
   const subTotal = cartItems.reduce((acc, item) => {
     const effectivePrice = item.userResellPrice || item.price;
@@ -128,6 +138,7 @@ export default function CheckoutPage() {
     try {
       const orderRef = await db.collection('n3dorders').add({
         userId: user.uid,
+        Mobilenumber: userMobile,
         userPhone: deliveryAddress.mobile, 
         customerInfo: deliveryAddress,     
         comments: comments,                

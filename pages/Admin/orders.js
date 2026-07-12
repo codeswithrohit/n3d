@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import { firebase } from '../../Firebase/config';
-
+import { useRouter } from 'next/navigation';
 const AdminOrders = () => {
+  const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -301,7 +302,7 @@ const AdminOrders = () => {
                         <td className="px-6 py-4">
                           <div className="flex flex-col gap-1.5">
                             <span className="text-sm font-semibold text-slate-900">
-                              {order.customerInfo?.company || 'Guest User'}
+                              {order.customerInfo?.name|| 'Guest User'}
                             </span>
                             <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
                               <svg className="w-3 h-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -348,12 +349,12 @@ const AdminOrders = () => {
 
                         {/* 6. Action Button */}
                         <td className="px-6 py-4 text-right">
-                          <button 
-                            onClick={() => openModal(order)}
-                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all shadow-sm"
+                          <a
+                      onClick={() => router.push(`/Admin/orderdetails?orderId=${order.id}`)}
+                            className="inline-flex cursor-pointer items-center justify-center px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all shadow-sm"
                           >
                             View Details
-                          </button>
+                          </a>
                         </td>
                       </tr>
                     );
