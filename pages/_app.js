@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useRouter } from "next/router";
 import Footer from "@/src/components/reusable/Footer";
 import Header from "@/src/components/reusable/Header";
@@ -12,6 +13,16 @@ export default function App({ Component, pageProps }) {
 
   return (
     <>
+      {/* Next.js Head for SEO and Meta tags */}
+      <Head>
+        <title>N3d – Elevate your space</title>
+        <meta 
+          name="description" 
+          content="Elevate your space with stylish, modern, and timeless decor pieces. Address: Moh-Dhanpurwa, PO+PS-Sasaram(Rohtas)Bihar, Bihar, Sasaram, 821115" 
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
       {/* Only show standard Header if it's NOT an admin route */}
       {!isAdminRoute && <Header />}
 

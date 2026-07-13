@@ -148,7 +148,7 @@ function ProductDetailsContent() {
     try {
       if (!cartItemId) await handleAddToCart();
       await new Promise(resolve => setTimeout(resolve, 800));
-      router.push('/cart/cart-page');
+      router.push('/cart/Cart-page');
     } catch (error) {
       alert("Failed to process purchase.");
     } finally {

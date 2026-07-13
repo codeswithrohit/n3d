@@ -248,7 +248,7 @@ export default function Header() {
 
   const handleCartClick = () => {
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      router.push("/cart/cart-page");
+      router.push("/cart/Cart-page");
     } else {
       setCartOpen(!cartOpen);
     }
