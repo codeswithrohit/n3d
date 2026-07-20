@@ -8,15 +8,12 @@ export default function Carousel() {
   const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
-  
-  // Track how many items to show based on screen size
-  const [itemsPerView, setItemsPerView] = useState(3);
 
-  // 1. Fetch Categories & Extract Sliders (Optimized with Caching)
+  // 1. Fetch Offers & Extract Sliders (Optimized with Caching)
   useEffect(() => {
-    const fetchCategorySliders = async () => {
+    const fetchOfferSliders = async () => {
       // Step A: Check local storage for instant loading
-      const cachedSlides = sessionStorage.getItem('cached_carousel_slides');
+      const cachedSlides = sessionStorage.getItem('cached_carousel_offers');
       if (cachedSlides) {
         setSlides(JSON.parse(cachedSlides));
         setLoading(false); // Instantly remove skeleton loader
@@ -24,20 +21,18 @@ export default function Carousel() {
 
       try {
         const db = firebase.firestore();
-        // Step B: Fetch fresh data from Firebase
-        const snapshot = await db.collection('n3dcategories').get();
-        
+        // Step B: Fetch fresh data from Firebase n3doffers
+        const snapshot = await db.collection('n3doffers').orderBy('createdAt', 'desc').get();
         let dynamicSlides = [];
 
         snapshot.docs.forEach(doc => {
-          const categoryData = doc.data();
-          if (categoryData.sliders && categoryData.sliders.length > 0) {
-            categoryData.sliders.forEach(sliderUrl => {
-              dynamicSlides.push({
-                img: sliderUrl,
-                title: "LATEST COLLECTION OF",
-                highlight: categoryData.name.toUpperCase(),
-              });
+          const offerData = doc.data();
+          // Only push to slider if the offer has an image uploaded
+          if (offerData.imageUrl) {
+            dynamicSlides.push({
+              img: offerData.imageUrl,
+              code: offerData.code,
+              discount: offerData.discount
             });
           }
         });
@@ -45,34 +40,22 @@ export default function Carousel() {
         // Step C: Update state and cache ONLY if the data has changed
         if (JSON.stringify(dynamicSlides) !== cachedSlides) {
           setSlides(dynamicSlides);
-          sessionStorage.setItem('cached_carousel_slides', JSON.stringify(dynamicSlides));
+          sessionStorage.setItem('cached_carousel_offers', JSON.stringify(dynamicSlides));
         }
       } catch (error) {
-        console.error("Error fetching sliders: ", error);
+        console.error("Error fetching offer sliders: ", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCategorySliders();
+    fetchOfferSliders();
   }, []);
 
-  // 2. Responsive Items Per View
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) setItemsPerView(1); // Mobile
-      else if (window.innerWidth < 1024) setItemsPerView(2); // Tablet
-      else setItemsPerView(3); // Desktop
-    };
-
-    handleResize(); 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
+  const itemsPerView = 1; // Always show 1 image per view to fit all screens
   const maxIndex = Math.max(0, slides.length - itemsPerView);
 
-  // 3. Handle Auto-Slide Interval
+  // 2. Handle Auto-Slide Interval
   useEffect(() => {
     if (slides.length <= itemsPerView) return; 
 
@@ -93,22 +76,18 @@ export default function Carousel() {
     setCurrent((prev) => (prev === 0 ? maxIndex : prev - 1));
   };
 
-  // 4. Skeleton Loading State
+  // 3. Skeleton Loading State (Adjusted for Full Width 1 Item)
   if (loading) {
     return (
-      <div className="w-full px-4 lg:px-8 py-6 max-w-[1500px] mx-auto">
-        <div className="flex gap-4">
-          {[1, 2, 3].map((_, i) => (
-            <div key={i} className={`relative w-full h-[180px] sm:h-[220px] md:h-[260px] bg-gray-200 dark:bg-neutral-800 animate-pulse rounded-xl overflow-hidden ${i > 0 ? 'hidden md:block' : ''} ${i === 1 ? 'hidden sm:block' : ''}`}>
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]"></div>
-            </div>
-          ))}
+      <div className="w-full px-2 sm:px-4 lg:px-8 py-6 max-w-[1500px] mx-auto">
+        <div className="relative w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[450px] bg-gray-200 dark:bg-neutral-800 animate-pulse rounded-2xl overflow-hidden shadow-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]"></div>
         </div>
       </div>
     );
   }
 
-  // 5. Empty State
+  // 4. Empty State
   if (slides.length === 0 && !loading) {
     return null; 
   }
@@ -117,24 +96,25 @@ export default function Carousel() {
     <div className="w-full bg-black px-2 sm:px-4 lg:px-8 py-6 max-w-[1500px] mx-auto relative group">
       
       {/* Slider Container Track */}
-      <div className="overflow-hidden w-full relative">
+      <div className="overflow-hidden w-full relative rounded-2xl shadow-lg bg-gray-100 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800">
         <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${current * (100 / itemsPerView)}%)` }}
+          className="flex transition-transform duration-700 ease-in-out h-full"
+          style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {slides.map((slide, index) => (
             <div
               key={index}
-              className="shrink-0 px-2"
-              style={{ width: `${100 / itemsPerView}%` }}
+              className="w-full h-full shrink-0 flex items-center justify-center relative"
             >
-              {/* Individual Card */}
-              <div className="w-full h-[180px] sm:h-[220px] md:h-[260px] rounded-xl overflow-hidden shadow-sm relative bg-gray-100 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800">
+              {/* Individual Full-Width Responsive Card */}
+              <div className="w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[450px] relative">
                 <img
                   src={slide.img}
-                  alt={slide.highlight}
+                  alt={slide.code}
                   className="w-full h-full object-cover" 
                 />
+                
+              
               </div>
             </div>
           ))}
@@ -146,7 +126,7 @@ export default function Carousel() {
         <>
           <button
             onClick={prevSlide}
-            className={`absolute left-0 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-[#e53e3e] hover:bg-gray-50 hover:scale-105 transition-all z-10 ${
+            className={`absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full shadow-xl text-black hover:bg-white hover:scale-110 transition-all z-10 ${
               current === 0 ? "opacity-0 pointer-events-none" : "opacity-100"
             }`}
           >
@@ -155,7 +135,7 @@ export default function Carousel() {
 
           <button
             onClick={nextSlide}
-            className={`absolute right-0 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.15)] text-[#e53e3e] hover:bg-gray-50 hover:scale-105 transition-all z-10 ${
+            className={`absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full shadow-xl text-black hover:bg-white hover:scale-110 transition-all z-10 ${
               current === maxIndex ? "opacity-0 pointer-events-none" : "opacity-100"
             }`}
           >
@@ -163,6 +143,22 @@ export default function Carousel() {
           </button>
         </>
       )}
+
+      {/* Dots Indicator */}
+      {slides.length > itemsPerView && (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+           {slides.map((_, dotIndex) => (
+             <button
+               key={dotIndex}
+               onClick={() => setCurrent(dotIndex)}
+               className={`transition-all duration-300 rounded-full h-2 ${
+                 current === dotIndex ? "w-6 bg-white" : "w-2 bg-white/40 hover:bg-white/70"
+               }`}
+             />
+           ))}
+        </div>
+      )}
+
     </div>
   );
 }

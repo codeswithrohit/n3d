@@ -21,11 +21,17 @@ const AdminDashboard = () => {
   const [offers, setOffers] = useState([]);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const [editingOfferId, setEditingOfferId] = useState(null);
+  
+  // New State for Image Upload
+  const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const [offerForm, setOfferForm] = useState({
     code: '',
     discount: '',
     minOrder: '',
-    validTill: ''
+    validTill: '',
+    imageUrl: ''
   });
 
   const db = firebase.firestore();
@@ -79,8 +85,15 @@ const AdminDashboard = () => {
     setOfferForm({ ...offerForm, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    if (e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
   const handleOpenAddOffer = () => {
-    setOfferForm({ code: '', discount: '', minOrder: '', validTill: '' });
+    setOfferForm({ code: '', discount: '', minOrder: '', validTill: '', imageUrl: '' });
+    setImageFile(null);
     setEditingOfferId(null);
     setIsOfferModalOpen(true);
   };
@@ -90,8 +103,10 @@ const AdminDashboard = () => {
       code: offer.code,
       discount: offer.discount,
       minOrder: offer.minOrder,
-      validTill: offer.validTill
+      validTill: offer.validTill,
+      imageUrl: offer.imageUrl || ''
     });
+    setImageFile(null);
     setEditingOfferId(offer.id);
     setIsOfferModalOpen(true);
   };
@@ -109,12 +124,25 @@ const AdminDashboard = () => {
 
   const handleOfferSubmit = async (e) => {
     e.preventDefault();
+    setIsUploading(true);
+    
     try {
+      let uploadedImageUrl = offerForm.imageUrl;
+
+      // Handle Image Upload to Firebase Storage
+      if (imageFile) {
+        const storageRef = firebase.storage().ref();
+        const fileRef = storageRef.child(`offers/${Date.now()}_${imageFile.name}`);
+        await fileRef.put(imageFile);
+        uploadedImageUrl = await fileRef.getDownloadURL();
+      }
+
       const offerData = {
         code: offerForm.code.toUpperCase(),
         discount: Number(offerForm.discount),
         minOrder: Number(offerForm.minOrder),
         validTill: offerForm.validTill,
+        imageUrl: uploadedImageUrl // Saving the URL in Firestore
       };
 
       if (editingOfferId) {
@@ -130,9 +158,13 @@ const AdminDashboard = () => {
       }
 
       setIsOfferModalOpen(false);
+      setImageFile(null);
       fetchOffers();
     } catch (error) {
       console.error("Error saving offer: ", error);
+      alert("Error saving offer. Check console for details.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -141,9 +173,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-white p-2 md:p-6 font-sans text-slate-800 relative bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-      
       <div className="max-w-[1600px] mx-auto flex flex-col min-h-[90vh]">
-        
         {/* HEADER */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4 bg-white/70 backdrop-blur-md p-5 rounded-xl border border-white shadow-sm">
           <div>
@@ -161,7 +191,6 @@ const AdminDashboard = () => {
           </div>
         ) : (
           <div className="flex-1 space-y-6">
-            
             {/* ================= KPI STATS GRID ================= */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <a href="/admin/products" className={`${statCardClasses} bg-slate-900 text-white border-slate-800`}>
@@ -171,7 +200,6 @@ const AdminDashboard = () => {
                 </div>
                 <div className="text-2xl opacity-50">📦</div>
               </a>
-              
               <a href="/admin/users" className={`${statCardClasses} bg-white border-slate-200`}>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Registered Users</p>
@@ -197,10 +225,8 @@ const AdminDashboard = () => {
               </a>
             </div>
 
-      
             {/* ================= RECENT DATA TABLES ================= */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
               {/* Recent Orders Block */}
               <div className="bg-white/90 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                 <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -288,10 +314,10 @@ const AdminDashboard = () => {
                   </table>
                 </div>
               </div>
-
             </div>
-                  {/* ================= OFFERS MANAGEMENT ================= */}
-                  <div className="bg-white/90 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+
+            {/* ================= OFFERS MANAGEMENT ================= */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
               <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Active Offers & Coupons</h3>
                 <button 
@@ -306,6 +332,7 @@ const AdminDashboard = () => {
                   <thead>
                     <tr className="bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border-b border-slate-100">
                       <th className="px-4 py-3 w-10 text-center">#</th>
+                      <th className="px-4 py-3">Banner</th>
                       <th className="px-4 py-3">Coupon Code</th>
                       <th className="px-4 py-3">Discount (₹)</th>
                       <th className="px-4 py-3">Min Order (₹)</th>
@@ -315,8 +342,15 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {offers.length > 0 ? offers.map((offer, index) => (
-                      <tr key={offer.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={offer.id} className="hover:bg-slate-50 transition-colors items-center">
                         <td className="px-4 py-3 text-center text-xs font-bold text-slate-400">{index + 1}</td>
+                        <td className="px-4 py-3">
+                          {offer.imageUrl ? (
+                            <img src={offer.imageUrl} alt="Offer" className="h-10 w-20 object-cover rounded shadow-sm border border-slate-200" />
+                          ) : (
+                            <span className="text-[10px] text-slate-400 italic">No Image</span>
+                          )}
+                        </td>
                         <td className="px-4 py-3 font-black text-slate-900 tracking-wider">{offer.code}</td>
                         <td className="px-4 py-3 font-bold text-green-600">₹{offer.discount}</td>
                         <td className="px-4 py-3 font-semibold text-slate-700">₹{offer.minOrder}</td>
@@ -331,16 +365,14 @@ const AdminDashboard = () => {
                         </td>
                       </tr>
                     )) : (
-                      <tr><td colSpan="6" className="p-8 text-center text-xs font-medium text-slate-400">No active offers. Click "+ Add Offer" to create one.</td></tr>
+                      <tr><td colSpan="7" className="p-8 text-center text-xs font-medium text-slate-400">No active offers. Click "+ Add Offer" to create one.</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
-
           </div>
         )}
-
       </div>
 
       {/* ================= OFFER FORM MODAL ================= */}
@@ -351,8 +383,8 @@ const AdminDashboard = () => {
               <h3 className="font-black text-slate-900">{editingOfferId ? 'Edit Offer' : 'Create New Offer'}</h3>
               <button onClick={() => setIsOfferModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
             </div>
-            
             <form onSubmit={handleOfferSubmit} className="p-6 space-y-4">
+              
               <div>
                 <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Coupon Code</label>
                 <input 
@@ -405,19 +437,35 @@ const AdminDashboard = () => {
                 />
               </div>
 
+              {/* IMAGE UPLOAD INPUT */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Offer Banner Image (For Home Slider)</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleImageChange} 
+                  className="w-full border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+                />
+                {offerForm.imageUrl && !imageFile && (
+                  <p className="text-[10px] text-green-600 mt-1 font-bold">Current image loaded. Uploading a new one will replace it.</p>
+                )}
+              </div>
+
               <div className="pt-4 flex gap-3">
                 <button 
                   type="button" 
                   onClick={() => setIsOfferModalOpen(false)}
-                  className="flex-1 px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 transition-colors"
+                  className="flex-1 px-4 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
+                  disabled={isUploading}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 px-4 py-2 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-colors shadow-md"
+                  className="flex-1 px-4 py-2 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 transition-colors shadow-md disabled:opacity-50"
+                  disabled={isUploading}
                 >
-                  {editingOfferId ? 'Update Offer' : 'Save Offer'}
+                  {isUploading ? 'Uploading...' : (editingOfferId ? 'Update Offer' : 'Save Offer')}
                 </button>
               </div>
             </form>
