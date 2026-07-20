@@ -342,7 +342,7 @@ export default function CartPage() {
   };
 
   const subTotal = cartItems.reduce((acc, item) => acc + (Number(item.price) * item.quantity), 0);
-  const totalTax = subTotal * 0.18;
+  const totalTax = subTotal * 0;
   const grandTotal = subTotal + totalTax;
 
   // SKELETON LOADING STATE
@@ -557,7 +557,7 @@ export default function CartPage() {
                     <span className="font-bold text-white">₹{subTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-neutral-400 text-sm font-medium">
-                    <span>Estimated Tax (18%)</span>
+                    <span>Estimated Tax (0%)</span>
                     <span className="font-bold text-white">₹{totalTax.toFixed(2)}</span>
                   </div>
                   <div className="pt-4 border-t border-neutral-800 flex justify-between items-end">

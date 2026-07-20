@@ -21,34 +21,65 @@ const Influencer = () => {
   // Create an array of refs to control the play/pause state of each video
   const videoRefs = useRef([]);
 
-  // Fetch Videos from Firestore
+  // 1. Fetch Videos from Firestore (Optimized with Caching & Anti-Flicker)
   useEffect(() => {
+    // Step A: Load instantly from session storage
+    const cachedString = sessionStorage.getItem('cached_influencer_videos');
+    let cachedVideos = [];
+    
+    if (cachedString) {
+      cachedVideos = JSON.parse(cachedString);
+      setVideos(cachedVideos);
+      setLoading(false); // Instantly remove skeleton loader
+    }
+
     const db = firebase.firestore();
+    
+    // Step B: Set up real-time listener in the background
     const unsubscribe = db.collection('n3dinfluencer_videos')
       .orderBy('createdAt', 'desc')
       .onSnapshot((snapshot) => {
         const videoData = snapshot.docs.map(doc => {
           const data = doc.data();
-          const mockOriginalPrice = Math.floor(Math.random() * 1000) + 199;
-          const mockDiscount = Math.floor(Math.random() * 50) + 30;
-          const mockPrice = Math.floor(mockOriginalPrice * (1 - mockDiscount / 100));
-          const mockViews = Math.random() > 0.5 
-            ? `${Math.floor(Math.random() * 90) + 10}K` 
-            : `${Math.floor(Math.random() * 5) + 1}L`;
+          
+          // Look for this video in the cache to keep the random numbers consistent
+          // This prevents the numbers from "flickering" when the background sync finishes
+          const existingVideo = cachedVideos.find(v => v.id === doc.id);
+
+          const originalPrice = existingVideo ? existingVideo.originalPrice : Math.floor(Math.random() * 1000) + 199;
+          const discount = existingVideo ? existingVideo.discount : Math.floor(Math.random() * 50) + 30;
+          const price = existingVideo ? existingVideo.price : Math.floor(originalPrice * (1 - discount / 100));
+          
+          let views = existingVideo?.views;
+          if (!views) {
+            views = Math.random() > 0.5 
+              ? `${Math.floor(Math.random() * 90) + 10}K` 
+              : `${Math.floor(Math.random() * 5) + 1}L`;
+          }
+
+          const likes = existingVideo ? existingVideo.likes : Math.floor(Math.random() * 900) + 100;
 
           return {
             id: doc.id,
             title: data.title || 'Amazing Product',
             videoUrl: data.videoUrl,
-            views: mockViews,
-            price: mockPrice,
-            originalPrice: mockOriginalPrice,
-            discount: mockDiscount,
-            likes: Math.floor(Math.random() * 900) + 100
+            views: views,
+            price: price,
+            originalPrice: originalPrice,
+            discount: discount,
+            likes: likes
           };
         });
         
-        setVideos(videoData);
+        // Step C: Update state and save to cache
+        // We stringify and compare to avoid unnecessary re-renders if the data hasn't actually changed
+        if (JSON.stringify(videoData) !== JSON.stringify(videos)) {
+            setVideos(videoData);
+            sessionStorage.setItem('cached_influencer_videos', JSON.stringify(videoData));
+            // Update our local variable so future snapshot updates in this session check against the latest data
+            cachedVideos = videoData; 
+        }
+        
         setLoading(false);
       }, (error) => {
         console.error("Error fetching videos: ", error);
@@ -56,6 +87,7 @@ const Influencer = () => {
       });
 
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Lock body scroll when modal is open
@@ -105,7 +137,7 @@ const Influencer = () => {
         Top Pick By Influencers
       </h2>
 
-      {/* Loading Skeleton */}
+      {/* 2. Loading Skeleton (Only seen on the very first visit) */}
       {loading ? (
         <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4">
           {[1, 2, 3, 4, 5].map(i => (
@@ -147,8 +179,6 @@ const Influencer = () => {
                    </div>
                 </div>
               </div>
-
-             
             </div>
           ))}
           
@@ -234,15 +264,12 @@ const Influencer = () => {
                     playsInline
                     controls={offset === 0} // Only show controls for the active video
                   />
-
                 </div>
               );
             })}
           </div>
-
         </div>
       )}
-
     </div>
   );
 }

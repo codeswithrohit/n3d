@@ -12,11 +12,19 @@ export default function Carousel() {
   // Track how many items to show based on screen size
   const [itemsPerView, setItemsPerView] = useState(3);
 
-  // 1. Fetch Categories and Extract Sliders
+  // 1. Fetch Categories & Extract Sliders (Optimized with Caching)
   useEffect(() => {
     const fetchCategorySliders = async () => {
+      // Step A: Check local storage for instant loading
+      const cachedSlides = sessionStorage.getItem('cached_carousel_slides');
+      if (cachedSlides) {
+        setSlides(JSON.parse(cachedSlides));
+        setLoading(false); // Instantly remove skeleton loader
+      }
+
       try {
         const db = firebase.firestore();
+        // Step B: Fetch fresh data from Firebase
         const snapshot = await db.collection('n3dcategories').get();
         
         let dynamicSlides = [];
@@ -34,7 +42,11 @@ export default function Carousel() {
           }
         });
 
-        setSlides(dynamicSlides);
+        // Step C: Update state and cache ONLY if the data has changed
+        if (JSON.stringify(dynamicSlides) !== cachedSlides) {
+          setSlides(dynamicSlides);
+          sessionStorage.setItem('cached_carousel_slides', JSON.stringify(dynamicSlides));
+        }
       } catch (error) {
         console.error("Error fetching sliders: ", error);
       } finally {
@@ -53,17 +65,16 @@ export default function Carousel() {
       else setItemsPerView(3); // Desktop
     };
 
-    handleResize(); // Call initially
+    handleResize(); 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // The highest index we can scroll to without showing empty space
   const maxIndex = Math.max(0, slides.length - itemsPerView);
 
   // 3. Handle Auto-Slide Interval
   useEffect(() => {
-    if (slides.length <= itemsPerView) return; // Don't auto-scroll if all items fit on screen
+    if (slides.length <= itemsPerView) return; 
 
     const interval = setInterval(() => {
       setCurrent((prev) => (prev >= maxIndex ? 0 : prev + 1));
@@ -122,7 +133,7 @@ export default function Carousel() {
                 <img
                   src={slide.img}
                   alt={slide.highlight}
-                  className="w-full h-full object-fit"
+                  className="w-full h-full object-cover" 
                 />
               </div>
             </div>
@@ -130,7 +141,7 @@ export default function Carousel() {
         </div>
       </div>
 
-      {/* Navigation Arrows (Matches the Screenshot Style) */}
+      {/* Navigation Arrows */}
       {slides.length > itemsPerView && (
         <>
           <button
@@ -152,7 +163,6 @@ export default function Carousel() {
           </button>
         </>
       )}
-
     </div>
   );
 }

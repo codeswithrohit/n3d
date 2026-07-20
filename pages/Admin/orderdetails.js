@@ -267,6 +267,13 @@ const OrderDetails = () => {
                   <span>Tax (18%)</span>
                   <span className="font-bold text-white">₹{safeNumber(order.tax).toFixed(2)}</span>
                 </div>
+                    {/* DISCOUNT & COUPON DISPLAY */}
+                    {Boolean(order.discountAmount && Number(order.discountAmount) > 0) && (
+                  <div className="flex justify-between text-xs text-green-400 font-medium">
+                    <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
+                    <span className="font-bold text-green-400">- ₹{Number(order.discountAmount).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-neutral-400 text-xs font-medium border-b border-neutral-800 pb-3">
                   <span>Shipping</span>
                   <span className="font-black text-white uppercase tracking-widest text-[10px]">

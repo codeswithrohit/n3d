@@ -12,11 +12,19 @@ const Topcategories = () => {
   // Reference for the horizontal scrolling container
   const sliderRef = useRef(null);
 
+  // 1. Fetch Categories (Optimized with Caching)
   useEffect(() => {
     const fetchCategories = async () => {
+      // Step A: Check local cache for instant loading
+      const cachedCategories = sessionStorage.getItem('cached_top_categories');
+      if (cachedCategories) {
+        setCategories(JSON.parse(cachedCategories));
+        setLoading(false); // Instantly remove skeleton loader
+      }
+
       try {
         const db = firebase.firestore();
-        // Fetch categories from Firestore
+        // Step B: Fetch fresh data from Firebase in the background
         const snapshot = await db.collection('n3dcategories').orderBy('createdAt', 'desc').get();
         
         const fetchedCats = snapshot.docs.map(doc => ({
@@ -24,7 +32,11 @@ const Topcategories = () => {
           ...doc.data()
         }));
         
-        setCategories(fetchedCats);
+        // Step C: Update UI and cache ONLY if the database data is different from the cache
+        if (JSON.stringify(fetchedCats) !== cachedCategories) {
+          setCategories(fetchedCats);
+          sessionStorage.setItem('cached_top_categories', JSON.stringify(fetchedCats));
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
@@ -49,7 +61,7 @@ const Topcategories = () => {
     }
   };
 
-  // 1. Skeleton Loader (Horizontal Sliding Style)
+  // 2. Skeleton Loader (Horizontal Sliding Style)
   if (loading) {
     return (
       <div className="max-w-[1500px] mx-auto px-4 md:px-8 py-10 font-sans">
@@ -81,7 +93,7 @@ const Topcategories = () => {
           <span className="absolute -bottom-2 left-0 w-1/2 h-1 bg-red-600 rounded-full"></span>
         </h2>
 
-        {/* Slider Navigation Buttons (Hidden on small screens where touch swipe is natural) */}
+        {/* Slider Navigation Buttons */}
         {categories.length > 3 && (
           <div className="hidden sm:flex items-center gap-2">
             <button

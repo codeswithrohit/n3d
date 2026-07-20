@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { firebase } from '../Firebase/config';
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaCheckCircle, FaShoppingBag, FaArrowLeft, FaMapMarkerAlt, FaCreditCard } from 'react-icons/fa';
-import Orders from './orders';
 
 const OrderDetails = () => {
   const router = useRouter();
@@ -35,13 +34,14 @@ const OrderDetails = () => {
         const docSnap = await docRef.get();
 
         if (docSnap.exists) {
+          const orderData = docSnap.data();
           // Extra security: ensure the current user actually owns this order
-          if(docSnap.data().userId !== user.uid) {
+          if (orderData.userId !== user.uid) {
              alert("Unauthorized access to this order.");
              router.push('/');
              return;
           }
-          setOrder({ id: docSnap.id, ...docSnap.data() });
+          setOrder({ id: docSnap.id, ...orderData });
         } else {
           console.error("Order not found");
         }
@@ -54,9 +54,8 @@ const OrderDetails = () => {
 
     return () => unsubscribe();
   }, [orderId, router]);
-console.log("orders",order)
-
-  // Helper for status badge styling (Dark Theme Tuned)
+console.log("order",order)
+  // Helper for status badge styling
   const getStatusBadge = (status) => {
     switch (status?.toLowerCase()) {
       case 'delivered':
@@ -70,7 +69,6 @@ console.log("orders",order)
         return 'border-neutral-700 bg-neutral-800/50 text-neutral-300';
     }
   };
-
 
   if (loading) {
     return (
@@ -113,7 +111,9 @@ console.log("orders",order)
             </div>
             <div>
               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1">Order Date</p>
-              <p className="text-xs font-bold text-white uppercase tracking-wider">{new Date(order.orderDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
+                {order.orderDate ? new Date(order.orderDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A'}
+              </p>
             </div>
             <div>
               <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Status</p>
@@ -135,26 +135,27 @@ console.log("orders",order)
                   <h3 className="text-[10px] font-black text-white uppercase tracking-widest">Shipping To</h3>
                 </div>
                 
-                <p className="font-black text-white text-sm mb-1 uppercase tracking-wider">{order.customerInfo.firstName} {order.customerInfo.lastName}</p>
                 <div className="text-neutral-400 text-xs font-medium leading-relaxed flex-1">
-  {/* Name */}
-  <p className="font-bold text-white mb-1">{order.customerInfo.name}</p>
-  
-  {/* Address lines mapped to houseNo and roadName */}
-  <p>{order.customerInfo.houseNo}</p>
-  {order.customerInfo.roadName && <p>{order.customerInfo.roadName}</p>}
-  {order.customerInfo.landmark && <p>{order.customerInfo.landmark}</p>}
-  
-  {/* City, State, and Pincode */}
-  <p>
-    {order.customerInfo.city}, {order.customerInfo.state} - <span className="font-bold text-white">{order.customerInfo.pincode}</span>
-  </p>
-  
-  {/* Mobile */}
-  <p className="mt-1">Mobile: {order.customerInfo.mobile}</p>
-</div>
+                  {/* Name */}
+                  <p className="font-black text-white text-sm mb-1 uppercase tracking-wider">
+                    {order.customerInfo?.name || `${order.customerInfo?.firstName || ''} ${order.customerInfo?.lastName || ''}`.trim() || 'Customer'}
+                  </p>
+                  
+                  {/* Address lines mapped to houseNo and roadName */}
+                  {order.customerInfo?.houseNo && <p>{order.customerInfo.houseNo}</p>}
+                  {order.customerInfo?.roadName && <p>{order.customerInfo.roadName}</p>}
+                  {order.customerInfo?.landmark && <p>{order.customerInfo.landmark}</p>}
+                  
+                  {/* City, State, and Pincode */}
+                  <p className="mt-1">
+                    {order.customerInfo?.city}{order.customerInfo?.city ? ', ' : ''}{order.customerInfo?.state} - <span className="font-bold text-white">{order.customerInfo?.pincode}</span>
+                  </p>
+                </div>
+                
                 <div className="mt-4 pt-3 border-t border-neutral-800">
-                  <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Phone: <span className="text-white ml-1">{order.userPhone}, {order.Mobilenumber}</span></p>
+                  <p className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">
+                    Phone: <span className="text-white ml-1">{order.customerInfo?.mobile || order.userPhone || order.Mobilenumber || 'N/A'}</span>
+                  </p>
                 </div>
               </div>
               
@@ -167,7 +168,7 @@ console.log("orders",order)
                 
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">Method</span>
-                  <span className="font-bold text-white bg-neutral-900 px-2.5 py-1 rounded-md border border-neutral-800 text-[10px] uppercase tracking-wider">{order.paymentMethod}</span>
+                  <span className="font-bold text-white bg-neutral-900 px-2.5 py-1 rounded-md border border-neutral-800 text-[10px] uppercase tracking-wider">{order.paymentMethod || 'COD'}</span>
                 </div>
 
                 {/* RESELL INFORMATION BLOCK */}
@@ -178,21 +179,21 @@ console.log("orders",order)
                     </p>
                     <div className="flex justify-between text-xs mb-2">
                       <span className="text-neutral-400 font-bold">Cash to Collect:</span>
-                      <span className="font-black text-white">₹{order.collectedAmount?.toFixed(2)}</span>
+                      <span className="font-black text-white">₹{Number(order.collectedAmount || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-xs pt-2 border-t border-neutral-800">
                       <span className="text-neutral-400 font-bold">Your Margin:</span>
-                      <span className="font-black text-emerald-400">₹{order.margin?.toFixed(2)}</span>
+                      <span className="font-black text-emerald-400">₹{Number(order.margin || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 )}
 
                 <div className="flex-1"></div>
 
-                {order.customerInfo.comments && (
+                {order.comments && (
                   <div className="mt-3 pt-3 border-t border-neutral-800">
                      <p className="text-[9px] font-black text-neutral-400 uppercase tracking-widest mb-1.5">Order Notes</p>
-                     <p className="text-white font-bold text-xs bg-neutral-900 p-3 rounded-xl border border-neutral-800">"{order.customerInfo.comments}"</p>
+                     <p className="text-white font-bold text-xs bg-neutral-900 p-3 rounded-xl border border-neutral-800">"{order.comments}"</p>
                   </div>
                 )}
               </div>
@@ -214,8 +215,9 @@ console.log("orders",order)
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-800">
-                    {order.items.map((item, idx) => {
-                      const effectivePrice = item.userResellPrice || item.price;
+                    {order.items && order.items.map((item, idx) => {
+                      const effectivePrice = Number(item.userResellPrice || item.price || 0);
+                      const quantity = Number(item.quantity || 1);
                       return (
                         <tr key={idx} className="hover:bg-neutral-900/40 transition-colors">
                           <td className="p-4 flex items-center gap-3">
@@ -231,9 +233,9 @@ console.log("orders",order)
                               )}
                             </div>
                           </td>
-                          <td className="p-4 text-xs font-bold text-neutral-400 text-right">₹{Number(effectivePrice).toFixed(2)}</td>
-                          <td className="p-4 text-xs font-black text-white text-center">x{item.quantity}</td>
-                          <td className="p-4 text-sm font-black text-white text-right">₹{(effectivePrice * item.quantity).toFixed(2)}</td>
+                          <td className="p-4 text-xs font-bold text-neutral-400 text-right">₹{effectivePrice.toFixed(2)}</td>
+                          <td className="p-4 text-xs font-black text-white text-center">x{quantity}</td>
+                          <td className="p-4 text-sm font-black text-white text-right">₹{(effectivePrice * quantity).toFixed(2)}</td>
                         </tr>
                       );
                     })}
@@ -251,12 +253,22 @@ console.log("orders",order)
               <div className="w-full sm:w-1/2 lg:w-1/3 space-y-2.5 bg-neutral-900 p-5 rounded-2xl border border-neutral-800">
                 <div className="flex justify-between text-neutral-400 text-xs font-medium">
                   <span>Subtotal</span>
-                  <span className="font-bold text-white">₹{order.subTotal?.toFixed(2)}</span>
+                  <span className="font-bold text-white">₹{Number(order.subTotal || 0).toFixed(2)}</span>
                 </div>
+                
                 <div className="flex justify-between text-neutral-400 text-xs font-medium">
-                  <span>Tax (18%)</span>
-                  <span className="font-bold text-white">₹{order.tax?.toFixed(2)}</span>
+                  <span>Tax (0%)</span>
+                  <span className="font-bold text-white">₹{Number(order.tax || 0).toFixed(2)}</span>
                 </div>
+
+                {/* DISCOUNT & COUPON DISPLAY */}
+                {Boolean(order.discountAmount && Number(order.discountAmount) > 0) && (
+                  <div className="flex justify-between text-xs text-green-400 font-medium">
+                    <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
+                    <span className="font-bold text-green-400">- ₹{Number(order.discountAmount).toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-neutral-400 text-xs font-medium border-b border-neutral-800 pb-3">
                   <span>Shipping</span>
                   <span className="font-black text-white uppercase tracking-widest text-[10px]">Free</span>
@@ -265,7 +277,7 @@ console.log("orders",order)
                 <div className="flex justify-between items-end pt-2">
                   <span className="font-black text-white text-sm uppercase tracking-wider">Order Total</span>
                   <div className="text-right">
-                    <span className="text-2xl font-black text-white leading-none">₹{order.grandTotal?.toFixed(2)}</span>
+                    <span className="text-2xl font-black text-white leading-none">₹{Number(order.grandTotal || 0).toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -273,7 +285,7 @@ console.log("orders",order)
                 {order.isResell && (
                   <div className="flex justify-between items-end pt-3 mt-3 border-t border-neutral-800">
                     <span className="font-black text-white text-[10px] uppercase tracking-widest">Cash to Collect</span>
-                    <span className="text-lg font-black text-emerald-400 leading-none">₹{order.collectedAmount?.toFixed(2)}</span>
+                    <span className="text-lg font-black text-emerald-400 leading-none">₹{Number(order.collectedAmount || 0).toFixed(2)}</span>
                   </div>
                 )}
               </div>
@@ -283,7 +295,6 @@ console.log("orders",order)
 
           {/* FOOTER ACTIONS */}
           <div className="bg-black p-5 border-t border-neutral-800 flex flex-col sm:flex-row justify-end items-center gap-3">
-             
              {/* Continue Shopping Button */}
              <button 
                 onClick={() => router.push('/')} 
@@ -296,7 +307,7 @@ console.log("orders",order)
         </div>
       </div>
 
-      {/* Print Styles (Tuned to keep dark text visibility on solid white paper layout shifts) */}
+      {/* Print Styles */}
       <style jsx global>{`
         @media print {
           body { background: white !important; color: black !important; }
